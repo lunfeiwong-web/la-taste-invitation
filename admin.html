@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>电子预订本 | La Taste x 3悦</title>
+  <meta name="description" content="La Taste x 3悦 手机电子预订本与客户运营工具">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="admin-layout admin-app fade-in">
+    <section class="admin-command">
+      <div>
+        <a class="mini-link" href="index.html">La Taste x 3悦</a>
+        <h1>电子预订本</h1>
+        <p>日历、桌位、熟客备注、核餐确认和客户提醒，手机打开就能看清楚。</p>
+      </div>
+      <div class="today-chip">
+        <span id="todayLabel">Today</span>
+        <strong id="todayCount">0 桌</strong>
+      </div>
+    </section>
+
+    <nav class="app-tabs" aria-label="Admin sections">
+      <button class="tab-btn is-active" type="button" data-tab="calendar">预订日历</button>
+      <button class="tab-btn" type="button" data-tab="booking">新增预订</button>
+      <button class="tab-btn" type="button" data-tab="customers">客户运营</button>
+      <button class="tab-btn" type="button" data-tab="marketing">自动营销</button>
+      <button class="tab-btn" type="button" data-tab="floor">巡台核餐</button>
+    </nav>
+
+    <section class="tab-panel is-active" id="calendar">
+      <div class="admin-card dashboard-card reveal">
+        <div class="panel-head">
+          <div>
+            <p class="section-kicker">Reservation Book</p>
+            <h2>今天预订一眼看完</h2>
+          </div>
+          <label class="date-pill">
+            <span>日期</span>
+            <input id="viewDate" type="date">
+          </label>
+        </div>
+
+        <div class="metric-grid">
+          <article class="metric">
+            <span>总预订</span>
+            <strong id="metricBookings">0</strong>
+          </article>
+          <article class="metric">
+            <span>总人数</span>
+            <strong id="metricPax">0</strong>
+          </article>
+          <article class="metric">
+            <span>已确认</span>
+            <strong id="metricConfirmed">0</strong>
+          </article>
+        </div>
+
+        <div class="mini-calendar" id="miniCalendar" aria-label="Seven day calendar"></div>
+      </div>
+
+      <div class="admin-card reveal">
+        <div class="panel-head compact">
+          <div>
+            <p class="section-kicker">Tables / Rooms</p>
+            <h2>桌位与包厢状态</h2>
+          </div>
+          <button id="clearDemo" class="icon-text-btn" type="button">清空示范资料</button>
+        </div>
+        <div class="room-grid" id="roomGrid"></div>
+      </div>
+
+      <div class="admin-card reveal">
+        <div class="panel-head compact">
+          <div>
+            <p class="section-kicker">Today List</p>
+            <h2>当日预订</h2>
+          </div>
+        </div>
+        <div class="booking-list" id="bookingList"></div>
+      </div>
+    </section>
+
+    <section class="tab-panel" id="booking">
+      <section class="admin-card reveal">
+        <p class="section-kicker">New Booking</p>
+        <h2>新增预订</h2>
+        <form id="bookingForm" class="booking-form">
+          <label>
+            <span>顾客姓名</span>
+            <input id="name" name="name" type="text" placeholder="例如：Mr Tan" autocomplete="name">
+          </label>
+
+          <label>
+            <span>电话号码</span>
+            <input id="phone" name="phone" type="tel" placeholder="例如：0123456789" autocomplete="tel">
+          </label>
+
+          <div class="form-grid">
+            <label>
+              <span>日期</span>
+              <input id="date" name="date" type="date">
+            </label>
+
+            <label>
+              <span>时间</span>
+              <input id="time" name="time" type="text" placeholder="例如：7:00pm">
+            </label>
+          </div>
+
+          <div class="form-grid">
+            <label>
+              <span>人数</span>
+              <input id="pax" name="pax" type="number" min="1" placeholder="例如：10">
+            </label>
+
+            <label>
+              <span>活动类型</span>
+              <select id="type" name="type">
+                <option value="">请选择</option>
+                <option>Birthday</option>
+                <option>Baby Full Moon</option>
+                <option>Company Dinner</option>
+                <option>Product Launch</option>
+                <option>Workshop</option>
+                <option>Private Gathering</option>
+                <option>Wedding / ROM</option>
+                <option>Others</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="form-grid">
+            <label>
+              <span>桌位 / 包厢</span>
+              <select id="table" name="table">
+                <option value="">未安排</option>
+                <option>Event Space 1</option>
+                <option>阁楼</option>
+                <option>Event Space C</option>
+                <option>Event Space D</option>
+              </select>
+            </label>
+
+            <label>
+              <span>状态</span>
+              <select id="status" name="status">
+                <option>Pending</option>
+                <option>Confirmed</option>
+                <option>Arrived</option>
+                <option>Completed</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="form-grid">
+            <label>
+              <span>纪念日</span>
+              <input id="anniversary" name="anniversary" type="date">
+            </label>
+
+            <label>
+              <span>客户标签</span>
+              <select id="tag" name="tag">
+                <option value="">自动判断</option>
+                <option>熟客</option>
+                <option>VIP</option>
+                <option>企业客户</option>
+                <option>沉睡客户</option>
+              </select>
+            </label>
+          </div>
+
+          <label>
+            <span>忌口 / 过敏</span>
+            <input id="dietary" name="dietary" type="text" placeholder="例如：不吃牛、花生过敏">
+          </label>
+
+          <label>
+            <span>备注</span>
+            <textarea id="note" name="note" rows="4" placeholder="例如：需要靠近舞台、加毛巾、宝宝椅"></textarea>
+          </label>
+
+          <div class="button-row">
+            <button id="saveBooking" class="btn btn-primary" type="button">保存预订</button>
+            <button id="copyLink" class="btn btn-ghost-dark" type="button">复制邀请函</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="admin-card result-card reveal" aria-live="polite">
+        <p class="section-kicker">Generated Link</p>
+        <h2>邀请函与核餐确认</h2>
+        <textarea id="generatedLink" class="link-output" rows="4" readonly></textarea>
+        <div class="button-row">
+          <a id="sendWhatsapp" class="btn btn-whatsapp" href="#" target="_blank" rel="noopener">WhatsApp 发邀请函</a>
+          <a id="confirmWhatsapp" class="btn btn-primary" href="#" target="_blank" rel="noopener">核餐确认</a>
+        </div>
+        <p id="copyStatus" class="status-text"></p>
+      </section>
+    </section>
+
+    <section class="tab-panel" id="customers">
+      <div class="admin-card reveal">
+        <p class="section-kicker">Customer Segments</p>
+        <h2>客户精细化运营</h2>
+        <div class="customer-list" id="customerList"></div>
+      </div>
+
+      <div class="admin-card reveal">
+        <p class="section-kicker">Anniversary</p>
+        <h2>纪念日提醒</h2>
+        <div class="reminder-list" id="anniversaryList"></div>
+      </div>
+    </section>
+
+    <section class="tab-panel" id="marketing">
+      <div class="admin-card reveal">
+        <p class="section-kicker">Marketing Automation</p>
+        <h2>循环发券计划</h2>
+        <div class="automation-card">
+          <span class="automation-badge">每月 1 号</span>
+          <h3>老客户 8 折回店券</h3>
+          <p>系统会帮你整理目标客户和文案。免费静态版不会自动群发，需要员工点 WhatsApp 发送。</p>
+          <button id="buildCouponList" class="btn btn-primary" type="button">生成本月发券名单</button>
+        </div>
+        <div class="customer-list" id="couponList"></div>
+      </div>
+    </section>
+
+    <section class="tab-panel" id="floor">
+      <div class="admin-card reveal">
+        <p class="section-kicker">Floor Notes</p>
+        <h2>巡台与核餐</h2>
+        <form class="booking-form">
+          <label>
+            <span>选择预订</span>
+            <select id="floorBooking"></select>
+          </label>
+          <label>
+            <span>餐中记录</span>
+            <textarea id="floorNote" rows="4" placeholder="例如：加毛巾、儿童椅、客人赶时间、甜品先上"></textarea>
+          </label>
+          <button id="saveFloorNote" class="btn btn-primary" type="button">保存巡台记录</button>
+        </form>
+        <div class="booking-list floor-log" id="floorLog"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
