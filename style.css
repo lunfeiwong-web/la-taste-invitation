@@ -862,33 +862,41 @@ textarea {
 
 .app-tabs {
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: max-content;
-  gap: 8px;
-  overflow-x: auto;
-  padding: 8px 14px 16px;
-  scrollbar-width: none;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 12px 14px 18px;
+  background: linear-gradient(180deg, rgba(23, 63, 52, 0.96), rgba(23, 63, 52, 0.9));
 }
 
-.app-tabs::-webkit-scrollbar {
-  display: none;
+.app-tabs::before {
+  content: attr(data-menu-label);
+  grid-column: 1 / -1;
+  color: var(--gold-light);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 .tab-btn {
   border: 1px solid rgba(255, 248, 234, 0.24);
-  border-radius: 999px;
+  border-radius: 18px;
   background: rgba(255, 248, 234, 0.08);
   color: rgba(255, 248, 234, 0.82);
   cursor: pointer;
-  padding: 10px 14px;
-  font-size: 0.9rem;
+  min-height: 58px;
+  padding: 12px 14px;
+  font-size: 0.95rem;
   font-weight: 900;
-  white-space: nowrap;
+  text-align: center;
+  white-space: normal;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
 }
 
 .tab-btn.is-active {
   background: var(--cream);
   color: var(--green);
+  border-color: rgba(234, 214, 166, 0.8);
 }
 
 .tab-panel {
