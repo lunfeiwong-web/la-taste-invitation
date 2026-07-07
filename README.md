@@ -1,6 +1,6 @@
 # La Taste x 3悦 免费电子预订本 + 邀请函系统
 
-这是一个完全免费的静态网页系统，使用纯 HTML + CSS + JavaScript 制作，不需要数据库、不需要登录、不需要收费 API、不需要 Google Sheet API，也不需要服务器费用。适合先部署到 GitHub Pages 做轻量预订管理。
+这是一个完全免费的静态网页系统，使用纯 HTML + CSS + JavaScript 制作，不需要数据库、不需要登录、不需要收费 API、不需要 Google Sheet API，也不需要服务器费用。正式站点名称：`La Taste e invitation card`。
 
 资料会保存在员工当前手机或电脑浏览器的 `localStorage`。同一台设备再次打开会看到之前保存的预订；换设备不会自动同步。
 
@@ -20,10 +20,10 @@
 
 直接用浏览器打开 `admin.html`。
 
-如果已经部署到 GitHub Pages，员工打开的网址会类似：
+如果已经部署到 Netlify，员工打开的网址会类似：
 
 ```text
-https://你的用户名.github.io/你的项目名/admin.html
+https://la-taste-e-invitation-card.netlify.app/admin.html
 ```
 
 ## 员工怎样填写资料
@@ -158,29 +158,34 @@ const restaurantWhatsapp = "60124633400";
 
 把 Google Maps placeholder 换成真实 Google Maps 链接，把 WhatsApp 电话换成餐厅正式号码即可。
 
-## 怎样部署到 GitHub Pages
+## 怎样部署到 Netlify
 
-1. 建立一个新的 GitHub repository
-2. 把这 6 个文件上传到 repository
-3. 进入 repository 的 `Settings`
-4. 找到 `Pages`
-5. Source 选择 `Deploy from a branch`
-6. Branch 选择 `main`
-7. Folder 选择 `/root`
-8. 点击 `Save`
-9. 等待 GitHub Pages 生成网址
+1. 登录 Netlify
+2. 选择 `Add new site`
+3. 选择 `Import an existing project`
+4. 连接 GitHub repo
+5. 选择这个项目
+6. Site name 填：`la-taste-e-invitation-card`
+7. Publish directory 保持项目根目录
+8. 部署完成后，公开网址会是：
+
+```text
+https://la-taste-e-invitation-card.netlify.app/
+```
 
 完成后，员工使用：
 
 ```text
-https://你的用户名.github.io/你的项目名/admin.html
+https://la-taste-e-invitation-card.netlify.app/admin.html
 ```
 
 顾客打开的邀请函链接会是：
 
 ```text
-https://你的用户名.github.io/你的项目名/invitation.html?name=...
+https://la-taste-e-invitation-card.netlify.app/invitation.html?name=...
 ```
+
+本机测试的 `http://127.0.0.1:4173/...` 不能发给顾客。系统已经配置为在本机测试时也生成 Netlify 正式链接。
 
 ## 怎样之后升级成 Google Sheet 或数据库版本
 

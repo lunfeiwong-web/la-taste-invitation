@@ -1,6 +1,7 @@
 (function () {
   const mapsUrl = "https://www.google.com/maps/search/?api=1&query=La%20Taste%20Riverfront%20City%2C%20No.%20218%20%26%20219%2C%20Jalan%20Mawar%203%2F2%2C%20Taman%20Pekan%20Baru%2C%2008000%20Sungai%20Petani%2C%20Kedah";
   const restaurantWhatsapp = "60124633400";
+  const publicSiteUrl = "https://la-taste-e-invitation-card.netlify.app/";
   const storageKey = "laTasteBookingsV2";
   const floorKey = "laTasteFloorNotesV1";
   const tables = ["Event Space 1", "阁楼", "Event Space C", "Event Space D"];
@@ -10,6 +11,8 @@
   const valueOrDash = (value) => value && value.trim() ? value.trim() : "-";
   const todayIso = () => new Date().toISOString().slice(0, 10);
   const makeId = () => window.crypto?.randomUUID ? window.crypto.randomUUID() : `id-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const isLocalPreview = () => ["127.0.0.1", "localhost", ""].includes(window.location.hostname);
+  const publicPageUrl = (path) => isLocalPreview() ? new URL(path, publicSiteUrl) : new URL(path, window.location.href);
 
   function setupRevealAnimation() {
     const items = document.querySelectorAll(".reveal");
@@ -178,7 +181,7 @@
   }
 
   function buildInvitationUrl() {
-    const base = new URL("invitation.html", window.location.href);
+    const base = publicPageUrl("invitation.html");
     const noteParts = [$("#note")?.value.trim(), $("#dietary")?.value.trim() ? `忌口：${$("#dietary").value.trim()}` : ""].filter(Boolean);
     const fields = ["name", "phone", "date", "time", "pax", "type"];
 
@@ -323,7 +326,7 @@
     const customer = customers.find((item) => normalisePhone(item.phone) === normalisePhone(booking.phone));
     const phone = normalisePhone(booking.phone);
     const confirmUrl = phone ? `https://wa.me/${phone}?text=${encodeURIComponent(buildConfirmMessage(booking))}` : "#";
-    const invitationUrl = new URL("invitation.html", window.location.href);
+    const invitationUrl = publicPageUrl("invitation.html");
     ["name", "phone", "date", "time", "pax", "type", "note"].forEach((field) => {
       const value = field === "note"
         ? [booking.note, booking.dietary ? `忌口：${booking.dietary}` : ""].filter(Boolean).join(" / ")
@@ -576,9 +579,8 @@
       whatsappBtn.href = `https://wa.me/${restaurantWhatsapp}?text=${encodeURIComponent(message)}`;
     }
 
-    const inviteUrl = window.location.href;
-    const isLocalPreview = ["127.0.0.1", "localhost", ""].includes(window.location.hostname);
-    const localWarning = "现在是本机测试链接，发给别人不能打开。需要先部署到 GitHub Pages，才会变成可分享链接。";
+    const inviteUrl = isLocalPreview() ? publicPageUrl(`invitation.html${window.location.search}`).toString() : window.location.href;
+    const localNotice = "已改用 Netlify 正式链接。请确认 Netlify 站点已经发布后再发给顾客。";
     const inviteMessage = `La Taste x 3悦 电子邀请函 - ${guestName}\n${inviteUrl}`;
 
     if (inviteLinkOutput) {
@@ -587,22 +589,13 @@
     }
 
     if (shareWhatsappBtn) {
-      if (isLocalPreview) {
-        shareWhatsappBtn.href = "#";
-        shareWhatsappBtn.textContent = "需上线后才能分享给顾客";
-        shareWhatsappBtn.addEventListener("click", (event) => {
-          event.preventDefault();
-          if (shareStatus) shareStatus.textContent = localWarning;
-          if (inviteLinkOutput) inviteLinkOutput.select();
-        });
-      } else {
-        shareWhatsappBtn.href = `https://wa.me/?text=${encodeURIComponent(inviteMessage)}`;
-      }
+      shareWhatsappBtn.href = `https://wa.me/?text=${encodeURIComponent(inviteMessage)}`;
+      shareWhatsappBtn.textContent = "WhatsApp 分享邀请函";
     }
 
     if (copyInviteBtn) {
       copyInviteBtn.addEventListener("click", () => {
-        copyText(inviteUrl, shareStatus, isLocalPreview ? localWarning : "邀请函链接已复制，可以直接粘贴到 WhatsApp。");
+        copyText(inviteUrl, shareStatus, isLocalPreview() ? localNotice : "邀请函链接已复制，可以直接粘贴到 WhatsApp。");
         if (inviteLinkOutput) inviteLinkOutput.select();
       });
     }
