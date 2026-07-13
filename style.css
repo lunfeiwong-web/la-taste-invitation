@@ -155,6 +155,13 @@ textarea {
   font-weight: 700;
 }
 
+.invite-hero-content #inviteHeadline {
+  max-width: 10em;
+  font-family: "Noto Serif SC", serif;
+  font-size: clamp(2.35rem, 10.5vw, 4.9rem);
+  line-height: 1.06;
+}
+
 .hero-subtitle,
 .invite-hero-content p,
 .invite-hero-content span,
@@ -365,6 +372,111 @@ textarea {
   margin-top: -36px;
   position: relative;
   z-index: 3;
+}
+
+.welcome-card {
+  position: relative;
+  z-index: 3;
+  margin-top: -42px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(255, 243, 217, 0.9)),
+    var(--cream-card);
+}
+
+.welcome-card h2 {
+  font-size: clamp(1.75rem, 8vw, 2.55rem);
+}
+
+.welcome-card p {
+  margin: 0;
+  color: var(--green-soft);
+  font-family: "Noto Serif SC", serif;
+  font-size: 1.04rem;
+}
+
+.welcome-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.welcome-meta span {
+  border: 1px solid rgba(201, 154, 69, 0.24);
+  border-radius: 999px;
+  padding: 7px 11px;
+  background: rgba(255, 255, 255, 0.52);
+  color: var(--green);
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.confirmation-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.confirmation-card summary {
+  display: grid;
+  gap: 3px;
+  cursor: pointer;
+  padding: 18px 20px;
+  color: var(--green);
+  list-style: none;
+}
+
+.confirmation-card summary::-webkit-details-marker {
+  display: none;
+}
+
+.confirmation-card summary span {
+  font-family: "Noto Serif SC", serif;
+  font-size: 1.12rem;
+  font-weight: 900;
+}
+
+.confirmation-card summary small {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.confirmation-card summary::after {
+  content: "+";
+  position: absolute;
+  right: 22px;
+  top: 18px;
+  color: var(--gold);
+  font-size: 1.45rem;
+  font-weight: 900;
+}
+
+.confirmation-card[open] summary::after {
+  content: "-";
+}
+
+.compact-details {
+  margin: 0;
+  padding: 0 18px 18px;
+}
+
+.compact-details div {
+  border-radius: 14px;
+  padding: 11px 12px;
+}
+
+.event-note-card {
+  background:
+    linear-gradient(135deg, rgba(23, 63, 52, 0.96), rgba(36, 86, 72, 0.92)),
+    var(--green);
+}
+
+.event-note-card h2,
+.event-note-card p {
+  color: var(--cream);
+}
+
+.event-note-card p {
+  opacity: 0.86;
 }
 
 .detail-list {

@@ -5,6 +5,15 @@
   const storageKey = "laTasteBookingsV2";
   const floorKey = "laTasteFloorNotesV1";
   const tables = ["Event Space 1", "阁楼", "Event Space C", "Event Space D"];
+  const coverImages = {
+    restaurant: "images/la-taste-cover.png",
+    birthday: "images/event-birthday-backdrop.png",
+    baby: "images/event-baby-fullmoon-eggs.png",
+    company: "images/event-canape-dessert-bites.png",
+    wedding: "images/event-dessert-table-lace.png",
+    private: "images/event-party-setup-arch.png",
+    buffet: "images/event-space-buffet-canape.png"
+  };
 
   const $ = (selector) => document.querySelector(selector);
   const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -180,10 +189,59 @@
     writeJson(floorKey, notes);
   }
 
+  function coverFromType(type, selectedCover) {
+    if (selectedCover && selectedCover !== "auto") return selectedCover;
+    const lowerType = (type || "").toLowerCase();
+    if (lowerType.includes("birthday")) return "birthday";
+    if (lowerType.includes("baby") || lowerType.includes("full moon") || lowerType.includes("捉周")) return "baby";
+    if (lowerType.includes("company") || lowerType.includes("product") || lowerType.includes("workshop")) return "company";
+    if (lowerType.includes("wedding") || lowerType.includes("rom")) return "wedding";
+    if (lowerType.includes("private")) return "private";
+    return "restaurant";
+  }
+
+  function welcomeByType(type, host) {
+    const name = host || "我们";
+    const lowerType = (type || "").toLowerCase();
+    if (lowerType.includes("birthday")) {
+      return {
+        headline: "生日宴会邀请",
+        title: "欢迎大家一起来庆祝这份生日喜悦",
+        message: `${name} 诚挚邀请您一起出席这场生日宴。希望大家带着轻松开心的心情来到 La Taste x 3悦，一起吃饭、聊天、拍照，把这一晚变成温暖又难忘的回忆。`
+      };
+    }
+    if (lowerType.includes("baby") || lowerType.includes("full moon")) {
+      return {
+        headline: "满月宴邀请",
+        title: "欢迎大家来分享宝宝成长的第一份喜悦",
+        message: `${name} 诚挚邀请您一起见证这份珍贵的小幸福。感谢大家的祝福与陪伴，期待在 La Taste x 3悦 与您相聚。`
+      };
+    }
+    if (lowerType.includes("company") || lowerType.includes("product") || lowerType.includes("workshop")) {
+      return {
+        headline: "活动邀请",
+        title: "欢迎大家一起参与这场特别活动",
+        message: `${name} 诚挚邀请您出席这场活动。期待在舒适的空间里交流、分享与相聚，也谢谢每一位来宾的支持。`
+      };
+    }
+    if (lowerType.includes("wedding") || lowerType.includes("rom")) {
+      return {
+        headline: "喜宴邀请",
+        title: "诚邀您一起见证这份幸福",
+        message: `${name} 诚挚邀请您一起出席这场温暖的喜宴。您的到来，会让这一天更完整、更值得纪念。`
+      };
+    }
+    return {
+      headline: "诚邀您一起相聚",
+      title: "欢迎大家来参与这场温暖的宴会",
+      message: `${name} 想把这一刻，与重要的家人和朋友一起分享。期待您带着轻松愉快的心情来到 La Taste x 3悦，一起吃一顿好饭，留下一段值得记住的相聚时光。`
+    };
+  }
+
   function buildInvitationUrl() {
     const base = publicPageUrl("invitation.html");
     const noteParts = [$("#note")?.value.trim(), $("#dietary")?.value.trim() ? `忌口：${$("#dietary").value.trim()}` : ""].filter(Boolean);
-    const fields = ["name", "phone", "date", "time", "pax", "type"];
+    const fields = ["name", "phone", "date", "time", "pax", "type", "host", "welcome", "photo"];
 
     fields.forEach((field) => {
       const input = document.getElementById(field);
@@ -192,6 +250,8 @@
       }
     });
 
+    const cover = coverFromType($("#type")?.value || "", $("#cover")?.value || "auto");
+    if (cover) base.searchParams.set("cover", cover);
     if (noteParts.length) base.searchParams.set("note", noteParts.join(" / "));
     return base.toString();
   }
@@ -209,6 +269,10 @@
       status: $("#status")?.value || "Pending",
       anniversary: $("#anniversary")?.value || "",
       tag: $("#tag")?.value || "",
+      host: $("#host")?.value.trim() || "",
+      cover: coverFromType($("#type")?.value || "", $("#cover")?.value || "auto"),
+      photo: $("#photo")?.value.trim() || "",
+      welcome: $("#welcome")?.value.trim() || "",
       dietary: $("#dietary")?.value.trim() || "",
       note: $("#note")?.value.trim() || "",
       createdAt: new Date().toISOString()
@@ -327,7 +391,7 @@
     const phone = normalisePhone(booking.phone);
     const confirmUrl = phone ? `https://wa.me/${phone}?text=${encodeURIComponent(buildConfirmMessage(booking))}` : "#";
     const invitationUrl = publicPageUrl("invitation.html");
-    ["name", "phone", "date", "time", "pax", "type", "note"].forEach((field) => {
+    ["name", "phone", "date", "time", "pax", "type", "host", "cover", "photo", "welcome", "note"].forEach((field) => {
       const value = field === "note"
         ? [booking.note, booking.dietary ? `忌口：${booking.dietary}` : ""].filter(Boolean).join(" / ")
         : booking[field];
@@ -550,12 +614,16 @@
   function initInvitation() {
     const params = new URLSearchParams(window.location.search);
     const guestName = valueOrDash(params.get("name") || "Guest");
+    const hostName = valueOrDash(params.get("host"));
     const phone = valueOrDash(params.get("phone"));
     const date = valueOrDash(params.get("date"));
     const time = valueOrDash(params.get("time"));
     const pax = valueOrDash(params.get("pax"));
     const type = valueOrDash(params.get("type"));
     const note = valueOrDash(params.get("note"));
+    const customWelcome = valueOrDash(params.get("welcome"));
+    const coverKey = coverFromType(type, params.get("cover") || "auto");
+    const photoUrl = valueOrDash(params.get("photo"));
     const shareBtn = $("#shareInvite");
     const copyInviteBtn = $("#copyInviteLink");
     const shareWhatsappBtn = $("#shareInviteWhatsapp");
@@ -563,8 +631,22 @@
     const shareStatus = $("#shareStatus");
     const mapBtn = document.querySelector("[data-map-link]");
     const whatsappBtn = document.querySelector("[data-whatsapp-link]");
+    const inviteCover = $("#inviteCover");
+    const welcome = welcomeByType(type, hostName === "-" ? "" : hostName);
 
-    setText("guestGreeting", guestName === "Guest" ? "Dear Guest" : `Dear ${guestName}`);
+    const coverUrl = photoUrl !== "-" ? photoUrl : coverImages[coverKey] || coverImages.restaurant;
+    if (inviteCover) {
+      inviteCover.style.backgroundImage = `linear-gradient(rgba(23, 63, 52, 0.1), rgba(23, 63, 52, 0.1)), url("${coverUrl}")`;
+    }
+
+    setText("inviteHeadline", welcome.headline);
+    setText("inviteHost", hostName === "-" ? "A Warm Invitation" : `Hosted by ${hostName}`);
+    setText("inviteSubline", type === "-" ? "悦人 · 悦己 · 悦食" : type);
+    setText("welcomeTitle", welcome.title);
+    setText("welcomeMessage", customWelcome === "-" ? welcome.message : customWelcome);
+    setText("publicEventDate", date === "-" ? "日期待确认" : date);
+    setText("publicEventTime", time === "-" ? "时间待确认" : time);
+    setText("publicEventType", type === "-" ? "Private Event" : type);
     setText("guestName", guestName);
     setText("guestPhone", phone);
     setText("eventDate", date);
@@ -581,7 +663,7 @@
 
     const inviteUrl = isLocalPreview() ? publicPageUrl(`invitation.html${window.location.search}`).toString() : window.location.href;
     const localNotice = "已改用 Netlify 正式链接。请确认 Netlify 站点已经发布后再发给顾客。";
-    const inviteMessage = `La Taste x 3悦 电子邀请函 - ${guestName}\n${inviteUrl}`;
+    const inviteMessage = `${welcome.headline} - ${hostName === "-" ? guestName : hostName}\n${customWelcome === "-" ? welcome.message : customWelcome}\n${inviteUrl}`;
 
     if (inviteLinkOutput) {
       inviteLinkOutput.value = inviteUrl;

@@ -13,21 +13,34 @@
 <body>
   <main class="invite-page fade-in">
     <section class="invite-hero">
-      <div class="hero-media invite-cover" role="img" aria-label="Fine dining invitation cover"></div>
+      <div class="hero-media invite-cover" id="inviteCover" role="img" aria-label="Event invitation cover"></div>
       <div class="hero-shade"></div>
       <div class="gold-line"></div>
       <div class="invite-hero-content">
         <p class="eyebrow">La Taste x 3悦</p>
-        <h1>INVITATION</h1>
-        <p>悦人 · 悦己 · 悦食</p>
-        <span>Delight Others. Yourself. In Every Bite.</span>
+        <h1 id="inviteHeadline">诚邀您一起庆祝</h1>
+        <p id="inviteHost">A Warm Invitation</p>
+        <span id="inviteSubline">悦人 · 悦己 · 悦食</span>
       </div>
     </section>
 
-    <section class="invitation-card reservation-card reveal">
-      <p class="section-kicker">Reservation Details</p>
-      <h2 id="guestGreeting">Dear Guest</h2>
-      <dl class="detail-list">
+    <section class="invitation-card welcome-card reveal">
+      <p class="section-kicker">Welcome</p>
+      <h2 id="welcomeTitle">欢迎大家来参与这场温暖的宴会</h2>
+      <p id="welcomeMessage">我们想把这一刻，与重要的家人和朋友一起分享。期待您带着轻松愉快的心情来到 La Taste x 3悦，一起吃一顿好饭，留下一段值得记住的相聚时光。</p>
+      <div class="welcome-meta">
+        <span id="publicEventDate">日期待确认</span>
+        <span id="publicEventTime">时间待确认</span>
+        <span id="publicEventType">Private Event</span>
+      </div>
+    </section>
+
+    <details class="invitation-card confirmation-card reveal">
+      <summary>
+        <span>给顾客确认的预约资料</span>
+        <small>展开查看日期、时间、人数与备注</small>
+      </summary>
+      <dl class="detail-list compact-details">
         <div>
           <dt>顾客姓名</dt>
           <dd id="guestName">Guest</dd>
@@ -57,6 +70,12 @@
           <dd id="eventNote">-</dd>
         </div>
       </dl>
+    </details>
+
+    <section class="section event-note-card reveal">
+      <p class="section-kicker">For Our Guests</p>
+      <h2>带着开心的心情来就好</h2>
+      <p>现场会有餐点、空间与服务团队为大家准备好。请把这张邀请函保存下来，当天可以直接使用下方导航前往 La Taste x 3悦。</p>
     </section>
 
     <section class="section reveal">
@@ -135,6 +154,6 @@
     </section>
   </main>
 
-  <script src="script.js?v=netlify-20260707"></script>
+  <script src="script.js?v=netlify-20260713"></script>
 </body>
 </html>

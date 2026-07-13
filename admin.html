@@ -136,6 +136,35 @@
 
           <div class="form-grid">
             <label>
+              <span>宴会主人 / 邀请人</span>
+              <input id="host" name="host" type="text" placeholder="例如：Tan Family / Mr & Mrs Tan">
+            </label>
+
+            <label>
+              <span>邀请函封面照片</span>
+              <select id="cover" name="cover">
+                <option value="auto">按照活动类型自动选择</option>
+                <option value="birthday">生日宴会背景</option>
+                <option value="baby">宝宝满月 / 捉周背景</option>
+                <option value="company">公司聚餐 / 产品发布背景</option>
+                <option value="wedding">婚礼 / ROM 背景</option>
+                <option value="restaurant">La Taste 门面背景</option>
+              </select>
+            </label>
+          </div>
+
+          <label>
+            <span>顾客自己的照片链接（可选）</span>
+            <input id="photo" name="photo" type="url" placeholder="照片先上传到网上，再贴图片链接；留空就用上面主题照片">
+          </label>
+
+          <label>
+            <span>给宾客看的欢迎词</span>
+            <textarea id="welcome" name="welcome" rows="4" placeholder="留空时系统会按照活动类型自动写一段温暖邀请文案"></textarea>
+          </label>
+
+          <div class="form-grid">
+            <label>
               <span>桌位 / 包厢</span>
               <select id="table" name="table">
                 <option value="">未安排</option>
@@ -252,6 +281,6 @@
     </section>
   </main>
 
-  <script src="script.js?v=netlify-20260707"></script>
+  <script src="script.js?v=netlify-20260713"></script>
 </body>
 </html>
