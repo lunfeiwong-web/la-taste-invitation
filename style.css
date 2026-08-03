@@ -416,42 +416,22 @@ textarea {
   overflow: hidden;
 }
 
-.confirmation-card summary {
+.confirmation-head {
   display: grid;
   gap: 3px;
-  cursor: pointer;
   padding: 18px 20px;
   color: var(--green);
-  list-style: none;
 }
 
-.confirmation-card summary::-webkit-details-marker {
-  display: none;
-}
-
-.confirmation-card summary span {
+.confirmation-head span {
   font-family: "Noto Serif SC", serif;
   font-size: 1.12rem;
   font-weight: 900;
 }
 
-.confirmation-card summary small {
+.confirmation-head small {
   color: var(--muted);
   font-weight: 800;
-}
-
-.confirmation-card summary::after {
-  content: "+";
-  position: absolute;
-  right: 22px;
-  top: 18px;
-  color: var(--gold);
-  font-size: 1.45rem;
-  font-weight: 900;
-}
-
-.confirmation-card[open] summary::after {
-  content: "-";
 }
 
 .compact-details {
@@ -1347,6 +1327,45 @@ textarea {
   color: var(--muted);
   text-align: center;
   font-weight: 800;
+}
+
+.tenant-demo .admin-card {
+  border-color: rgba(234, 214, 166, 0.3);
+}
+
+.tenant-output {
+  display: grid;
+  gap: 10px;
+}
+
+.delivery-line {
+  display: grid;
+  grid-template-columns: 118px 1fr;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid rgba(23, 63, 52, 0.12);
+  border-radius: 16px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.delivery-line strong {
+  color: var(--gold);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.delivery-line span,
+.delivery-line a {
+  color: var(--green);
+  font-weight: 900;
+  word-break: break-word;
+}
+
+.delivery-line a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .floor-log {
