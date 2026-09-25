@@ -11,71 +11,63 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="invite-page fade-in">
-    <section class="invite-hero">
-      <div class="hero-media invite-cover" id="inviteCover" role="img" aria-label="Event invitation cover"></div>
-      <div class="hero-shade"></div>
-      <div class="gold-line"></div>
-      <div class="invite-hero-content">
-        <p class="eyebrow">La Taste x 3悦</p>
-        <h1 id="inviteHeadline">诚邀您一起庆祝</h1>
-        <p id="inviteHost">A Warm Invitation</p>
-        <span id="inviteSubline">悦人 · 悦己 · 悦食</span>
+  <main class="invite-page invite-story fade-in">
+    <section class="invite-envelope-stage" aria-label="La Taste event invitation">
+      <div class="hero-media invite-cover" id="inviteCover" role="img" aria-label="La Taste event background"></div>
+      <div class="invite-stage-shade"></div>
+      <div class="invite-stage-brand">
+        <span>La Taste x 3悦</span>
+        <strong id="inviteStageLabel">Event Invitation</strong>
       </div>
-    </section>
 
-    <section class="invitation-card welcome-card reveal">
-      <p class="section-kicker">Welcome</p>
-      <h2 id="welcomeTitle">欢迎大家来参与这场温暖的宴会</h2>
-      <p id="welcomeMessage">我们想把这一刻，与重要的家人和朋友一起分享。期待您带着轻松愉快的心情来到 La Taste x 3悦，一起吃一顿好饭，留下一段值得记住的相聚时光。</p>
-      <div class="welcome-meta">
-        <span id="publicEventDate">日期待确认</span>
-        <span id="publicEventTime">时间待确认</span>
-        <span id="publicEventType">Private Event</span>
-      </div>
-    </section>
+      <button id="openInviteEnvelope" class="envelope-button" type="button" aria-label="Open invitation card">
+        <span class="invite-sparkles" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </span>
+        <span class="envelope-glow"></span>
+        <span class="envelope">
+          <span class="envelope-flap"></span>
+          <span class="envelope-paper">
+            <span id="inviteHeadline">诚邀您一起庆祝</span>
+          </span>
+          <span class="envelope-front"></span>
+          <span class="envelope-seal">悦</span>
+        </span>
+        <span class="envelope-hint">轻触打开邀请函 / Tap to open</span>
+      </button>
 
-    <section class="invitation-card confirmation-card reveal">
-      <div class="confirmation-head">
-        <span>给顾客确认的预约资料</span>
-        <small>请确认日期、时间、人数与备注是否正确</small>
-      </div>
-      <dl class="detail-list compact-details">
-        <div>
-          <dt>顾客姓名</dt>
-          <dd id="guestName">Guest</dd>
+      <button id="inviteMusicToggle" class="invite-music-toggle" type="button" aria-label="Toggle invitation music">
+        <span>♪</span>
+      </button>
+
+      <article id="guestInviteCard" class="guest-invite-card" aria-live="polite">
+        <p class="section-kicker" id="inviteModeLabel">You Are Invited</p>
+        <h1 id="welcomeTitle">欢迎大家来参与这场温暖的宴会</h1>
+        <p id="welcomeMessage">我们想把这一刻，与重要的家人和朋友一起分享。期待您带着轻松愉快的心情来到 La Taste x 3悦，一起吃一顿好饭，留下一段值得记住的相聚时光。</p>
+
+        <div class="letter-lines">
+          <p><strong>日期 / Date</strong><span id="publicEventDate">日期待确认</span></p>
+          <p><strong>时间 / Time</strong><span id="publicEventTime">时间待确认</span></p>
+          <p><strong>地点 / Venue</strong><span id="publicEventVenue">La Taste Event Space · 3悦</span></p>
+          <p><strong>活动 / Event</strong><span id="inviteSubline">Private Event</span></p>
         </div>
-        <div>
-          <dt>电话</dt>
-          <dd id="guestPhone">-</dd>
+
+        <div class="guest-card-actions">
+          <a class="btn btn-primary" data-map-link href="https://www.google.com/maps/search/?api=1&query=La%20Taste%20Riverfront%20City%2C%20No.%20218%20%26%20219%2C%20Jalan%20Mawar%203%2F2%2C%20Taman%20Pekan%20Baru%2C%2008000%20Sungai%20Petani%2C%20Kedah" target="_blank" rel="noopener">一键导航</a>
+          <a id="shareInviteWhatsappTop" class="btn btn-whatsapp" href="https://wa.me/" target="_blank" rel="noopener">分享给宾客</a>
         </div>
-        <div>
-          <dt>日期</dt>
-          <dd id="eventDate">-</dd>
-        </div>
-        <div>
-          <dt>时间</dt>
-          <dd id="eventTime">-</dd>
-        </div>
-        <div>
-          <dt>人数</dt>
-          <dd id="eventPax">-</dd>
-        </div>
-        <div>
-          <dt>活动类型</dt>
-          <dd id="eventType">-</dd>
-        </div>
-        <div class="detail-wide">
-          <dt>备注</dt>
-          <dd id="eventNote">-</dd>
-        </div>
-      </dl>
+      </article>
     </section>
 
     <section class="section event-note-card reveal">
       <p class="section-kicker">For Our Guests</p>
-      <h2>带着开心的心情来就好</h2>
-      <p>现场会有餐点、空间与服务团队为大家准备好。请把这张邀请函保存下来，当天可以直接使用下方导航前往 La Taste x 3悦。</p>
+      <h2>带着开心的心情来就好 / Come and enjoy the moment</h2>
+      <p>现场会有餐点、空间与服务团队为大家准备好。Please keep this invitation and use the navigation button to arrive at La Taste 3悦.</p>
     </section>
 
     <section class="section reveal">
@@ -139,13 +131,12 @@
 
     <section class="section reveal">
       <p class="section-kicker">Buffet / Canapé</p>
-      <h2>按人数、预算与活动形式安排菜单</h2>
-      <p>我们提供适合企业活动、婚礼、开幕礼、生日派对与私人聚会的 Buffet 和 Canapé 配套。可根据人数、预算和活动形式安排菜单。</p>
+      <h2>按预算与活动形式安排菜单</h2>
+      <p>我们提供适合企业活动、婚礼、开幕礼、生日派对与私人聚会的 Buffet 和 Canapé 配套。可根据预算、口味和活动形式安排菜单。</p>
     </section>
 
     <section class="action-panel reveal">
       <a class="btn btn-primary" data-map-link href="https://www.google.com/maps/search/?api=1&query=La%20Taste%20Riverfront%20City%2C%20No.%20218%20%26%20219%2C%20Jalan%20Mawar%203%2F2%2C%20Taman%20Pekan%20Baru%2C%2008000%20Sungai%20Petani%2C%20Kedah" target="_blank" rel="noopener">一键导航</a>
-      <a class="btn btn-whatsapp" data-whatsapp-link href="https://wa.me/60124633400" target="_blank" rel="noopener">WhatsApp 联系我们</a>
       <a class="btn btn-ghost-dark" href="event-services.html">了解 Event 服务</a>
       <a id="shareInviteWhatsapp" class="btn btn-whatsapp" href="https://wa.me/" target="_blank" rel="noopener">WhatsApp 分享邀请函</a>
       <button id="copyInviteLink" class="btn btn-ghost-dark" type="button">复制邀请函链接</button>
@@ -154,6 +145,6 @@
     </section>
   </main>
 
-  <script src="script.js?v=netlify-20260803"></script>
+  <script src="script.js?v=local-booking-20260925"></script>
 </body>
 </html>

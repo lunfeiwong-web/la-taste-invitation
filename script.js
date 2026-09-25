@@ -1,10 +1,33 @@
 (function () {
-  const mapsUrl = "https://www.google.com/maps/search/?api=1&query=La%20Taste%20Riverfront%20City%2C%20No.%20218%20%26%20219%2C%20Jalan%20Mawar%203%2F2%2C%20Taman%20Pekan%20Baru%2C%2008000%20Sungai%20Petani%2C%20Kedah";
+  const mapsUrl = "https://www.google.com/maps/search/?api=1&query=La%20Taste%203%20%E6%82%A6%20Riverfront%20City%20Sungai%20Petani";
   const restaurantWhatsapp = "60124633400";
   const publicSiteUrl = "https://la-taste-e-invitation-card.netlify.app/";
   const storageKey = "laTasteBookingsV2";
   const floorKey = "laTasteFloorNotesV1";
-  const tables = ["Event Space 1", "阁楼", "Event Space C", "Event Space D"];
+  const tables = ["La Taste X 3 悦", "La Taste Event Space"];
+  const fixedBookings = [
+    {
+      id: "fixed-jasper-nyiew-2026-09-26-birthday",
+      name: "Jasper Nyiew",
+      phone: "0194777947",
+      date: "2026-09-26",
+      time: "7.00pm to 10.00pm",
+      pax: "",
+      type: "Birthday / 生日",
+      festivalType: "Birthday / 生日",
+      table: "",
+      status: "Confirmed",
+      anniversary: "",
+      tag: "",
+      cover: "birthday",
+      photo: "",
+      welcome: "Welcome To Jasper Nyiew 21st Birthday Party",
+      dietary: "",
+      note: "",
+      createdAt: "2026-09-24T00:00:00.000+08:00",
+      source: "fixed-invitation-link"
+    }
+  ];
   const coverImages = {
     restaurant: "images/la-taste-cover.png",
     birthday: "images/event-birthday-backdrop.png",
@@ -21,7 +44,28 @@
   const todayIso = () => new Date().toISOString().slice(0, 10);
   const makeId = () => window.crypto?.randomUUID ? window.crypto.randomUUID() : `id-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const isLocalPreview = () => ["127.0.0.1", "localhost", ""].includes(window.location.hostname);
-  const publicPageUrl = (path) => isLocalPreview() ? new URL(path, publicSiteUrl) : new URL(path, window.location.href);
+  const publicPageUrl = (path) => isLocalPreview() ? new URL(path, window.location.href) : new URL(path, window.location.href);
+  const isFestivalBooking = (booking) => booking?.bookingMode === "festival" || Boolean(booking?.festivalType);
+
+  function setValue(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.value = value || "";
+  }
+
+  function resetBookingForm() {
+    const form = $("#bookingForm");
+    if (!form) return;
+    form.reset();
+    setValue("editingId", "");
+    setValue("date", todayIso());
+    setValue("bookingMode", "normal");
+    setValue("festivalType", "");
+    const saveButton = $("#saveBooking");
+    if (saveButton) saveButton.textContent = "保存预订 / Save";
+    const cancelButton = $("#cancelEdit");
+    if (cancelButton) cancelButton.hidden = true;
+    updateLink();
+  }
 
   function setupRevealAnimation() {
     const items = document.querySelectorAll(".reveal");
@@ -78,6 +122,27 @@
     return digits;
   }
 
+  function bookingKey(booking) {
+    return [
+      normalisePhone(booking.phone),
+      booking.date || "",
+      (booking.time || "").toLowerCase().replace(/\s+/g, ""),
+      (booking.name || "").toLowerCase().replace(/\s+/g, "")
+    ].join("|");
+  }
+
+  function mergeFixedBookings(bookings) {
+    const merged = Array.isArray(bookings) ? bookings.slice() : [];
+    const keys = new Set(merged.map(bookingKey));
+    fixedBookings.forEach((booking) => {
+      if (!keys.has(bookingKey(booking))) {
+        merged.push({ ...booking });
+        keys.add(bookingKey(booking));
+      }
+    });
+    return merged;
+  }
+
   function readJson(key, fallback) {
     try {
       return JSON.parse(localStorage.getItem(key)) || fallback;
@@ -106,19 +171,24 @@
     const existing = readJson(storageKey, null);
     if (existing) {
       const tableMap = {
-        "包厢 A": "Event Space 1",
-        "包厢 B": "阁楼",
-        "大厅 T1": "Event Space C",
-        "大厅 T2": "阁楼",
-        "大厅 T3": "Event Space D",
-        "活动区": "Event Space C"
+        "包厢 A": "La Taste Event Space",
+        "包厢 B": "La Taste X 3 悦",
+        "大厅 T1": "La Taste X 3 悦",
+        "大厅 T2": "La Taste X 3 悦",
+        "大厅 T3": "La Taste X 3 悦",
+        "活动区": "La Taste Event Space",
+        "Event Space 1": "La Taste Event Space",
+        "阁楼": "La Taste X 3 悦",
+        "Event Space C": "La Taste Event Space",
+        "Event Space D": "La Taste Event Space"
       };
       const migrated = existing.map((booking) => ({
         ...booking,
         table: tableMap[booking.table] || booking.table
       }));
-      if (JSON.stringify(existing) !== JSON.stringify(migrated)) saveBookings(migrated);
-      return migrated;
+      const merged = mergeFixedBookings(migrated);
+      if (JSON.stringify(existing) !== JSON.stringify(merged)) saveBookings(merged);
+      return merged;
     }
 
     const today = todayIso();
@@ -130,8 +200,9 @@
         date: today,
         time: "7:00pm",
         pax: "10",
-        type: "Birthday",
-        table: "Event Space 1",
+        type: "Birthday / 生日",
+        festivalType: "Birthday / 生日",
+        table: "La Taste Event Space",
         status: "Confirmed",
         anniversary: `${new Date().getFullYear()}-08-18`,
         tag: "熟客",
@@ -146,8 +217,9 @@
         date: today,
         time: "8:15pm",
         pax: "4",
-        type: "Private Gathering",
-        table: "阁楼",
+        type: "Private Party / 私人派对",
+        festivalType: "Private Party / 私人派对",
+        table: "La Taste X 3 悦",
         status: "Pending",
         anniversary: `${new Date().getFullYear()}-07-12`,
         tag: "",
@@ -162,8 +234,9 @@
         date: addDays(new Date(), 1).toISOString().slice(0, 10),
         time: "12:30pm",
         pax: "18",
-        type: "Company Dinner",
-        table: "Event Space C",
+        type: "Company Celebration / 公司庆祝",
+        festivalType: "Company Celebration / 公司庆祝",
+        table: "La Taste Event Space",
         status: "Confirmed",
         anniversary: "",
         tag: "企业客户",
@@ -173,12 +246,13 @@
       }
     ];
 
-    writeJson(storageKey, demo);
-    return demo;
+    const seeded = mergeFixedBookings(demo);
+    writeJson(storageKey, seeded);
+    return seeded;
   }
 
   function saveBookings(bookings) {
-    writeJson(storageKey, bookings);
+    writeJson(storageKey, mergeFixedBookings(bookings));
   }
 
   function getFloorNotes() {
@@ -193,7 +267,7 @@
     if (selectedCover && selectedCover !== "auto") return selectedCover;
     const lowerType = (type || "").toLowerCase();
     if (lowerType.includes("birthday")) return "birthday";
-    if (lowerType.includes("baby") || lowerType.includes("full moon") || lowerType.includes("捉周")) return "baby";
+    if (lowerType.includes("baby") || lowerType.includes("full moon") || lowerType.includes("gender") || lowerType.includes("捉周")) return "baby";
     if (lowerType.includes("company") || lowerType.includes("product") || lowerType.includes("workshop")) return "company";
     if (lowerType.includes("wedding") || lowerType.includes("rom")) return "wedding";
     if (lowerType.includes("private")) return "private";
@@ -203,18 +277,25 @@
   function welcomeByType(type, host) {
     const name = host || "我们";
     const lowerType = (type || "").toLowerCase();
+    if (lowerType.includes("gender")) {
+      return {
+        headline: "Gender Reveal Party",
+        title: `欢迎来到 ${name} 派对`,
+        message: `亲爱的家人朋友，诚邀您来到 ${name} 的 Gender Reveal 派对，一起见证这个甜蜜又期待的时刻。\nDear family and friends, you are warmly invited to ${name}'s Gender Reveal party. Let us celebrate this lovely moment together.`
+      };
+    }
     if (lowerType.includes("birthday")) {
       return {
-        headline: "生日宴会邀请",
-        title: "欢迎大家一起来庆祝这份生日喜悦",
-        message: `${name} 诚挚邀请您一起出席这场生日宴。希望大家带着轻松开心的心情来到 La Taste x 3悦，一起吃饭、聊天、拍照，把这一晚变成温暖又难忘的回忆。`
+        headline: "Birthday Party",
+        title: `欢迎来到 ${name} 派对`,
+        message: `亲爱的家人朋友，诚邀您来到 ${name} 的生日派对，一起吃饭、聊天、拍照，把这一刻变成温暖的回忆。\nDear family and friends, you are warmly invited to ${name}'s birthday party. Let us enjoy good food, laughter and a memorable celebration together.`
       };
     }
     if (lowerType.includes("baby") || lowerType.includes("full moon")) {
       return {
-        headline: "满月宴邀请",
-        title: "欢迎大家来分享宝宝成长的第一份喜悦",
-        message: `${name} 诚挚邀请您一起见证这份珍贵的小幸福。感谢大家的祝福与陪伴，期待在 La Taste x 3悦 与您相聚。`
+        headline: "Baby Celebration",
+        title: `欢迎来到 ${name} 派对`,
+        message: `亲爱的家人朋友，诚邀您来到 ${name} 的宝宝庆祝派对，一起分享这份珍贵的小幸福。\nDear family and friends, you are warmly invited to ${name}'s baby celebration. Thank you for sharing this beautiful joy with us.`
       };
     }
     if (lowerType.includes("company") || lowerType.includes("product") || lowerType.includes("workshop")) {
@@ -226,22 +307,21 @@
     }
     if (lowerType.includes("wedding") || lowerType.includes("rom")) {
       return {
-        headline: "喜宴邀请",
-        title: "诚邀您一起见证这份幸福",
-        message: `${name} 诚挚邀请您一起出席这场温暖的喜宴。您的到来，会让这一天更完整、更值得纪念。`
+        headline: "Wedding Celebration",
+        title: `欢迎来到 ${name} 派对`,
+        message: `亲爱的家人朋友，诚邀您来到 ${name} 的庆祝派对，一起见证这份幸福。\nDear family and friends, you are warmly invited to ${name}'s celebration. Your presence will make the day even more meaningful.`
       };
     }
     return {
       headline: "诚邀您一起相聚",
-      title: "欢迎大家来参与这场温暖的宴会",
-      message: `${name} 想把这一刻，与重要的家人和朋友一起分享。期待您带着轻松愉快的心情来到 La Taste x 3悦，一起吃一顿好饭，留下一段值得记住的相聚时光。`
+      title: `欢迎来到 ${name} 派对`,
+      message: `亲爱的家人朋友，诚邀您来到 ${name} 的派对，在 La Taste 3悦 一起分享温暖的相聚时光。\nDear family and friends, you are warmly invited to ${name}'s party at La Taste 3悦. We look forward to sharing this special moment with you.`
     };
   }
 
   function buildInvitationUrl() {
     const base = publicPageUrl("invitation.html");
-    const noteParts = [$("#note")?.value.trim(), $("#dietary")?.value.trim() ? `忌口：${$("#dietary").value.trim()}` : ""].filter(Boolean);
-    const fields = ["name", "phone", "date", "time", "pax", "type", "host", "welcome", "photo"];
+    const fields = ["name", "date", "time", "table", "welcome", "bookingMode", "festivalType"];
 
     fields.forEach((field) => {
       const input = document.getElementById(field);
@@ -250,28 +330,30 @@
       }
     });
 
-    const cover = coverFromType($("#type")?.value || "", $("#cover")?.value || "auto");
+    const cover = coverFromType($("#festivalType")?.value || "", "auto");
     if (cover) base.searchParams.set("cover", cover);
-    if (noteParts.length) base.searchParams.set("note", noteParts.join(" / "));
     return base.toString();
   }
 
   function bookingFromForm() {
+    const bookingMode = $("#bookingMode")?.value || "normal";
+    const festivalType = $("#festivalType")?.value || "";
     return {
-      id: makeId(),
+      id: $("#editingId")?.value || makeId(),
+      bookingMode,
+      festivalType,
       name: $("#name")?.value.trim() || "",
       phone: $("#phone")?.value.trim() || "",
       date: $("#date")?.value || todayIso(),
       time: $("#time")?.value.trim() || "",
       pax: $("#pax")?.value.trim() || "",
-      type: $("#type")?.value || "",
+      type: festivalType || (bookingMode === "normal" ? "Normal Reservation / 普通预订" : ""),
       table: $("#table")?.value || "",
       status: $("#status")?.value || "Pending",
       anniversary: $("#anniversary")?.value || "",
       tag: $("#tag")?.value || "",
-      host: $("#host")?.value.trim() || "",
-      cover: coverFromType($("#type")?.value || "", $("#cover")?.value || "auto"),
-      photo: $("#photo")?.value.trim() || "",
+      cover: coverFromType(festivalType, "auto"),
+      photo: "",
       welcome: $("#welcome")?.value.trim() || "",
       dietary: $("#dietary")?.value.trim() || "",
       note: $("#note")?.value.trim() || "",
@@ -279,8 +361,56 @@
     };
   }
 
+  function bookingFromInvitationParams(params) {
+    const name = (params.get("name") || "").trim();
+    const phone = (params.get("phone") || "").trim();
+    const date = (params.get("date") || "").trim();
+    const time = (params.get("time") || "").trim();
+    if (!name || !phone || !date || !time) return null;
+
+    return {
+      id: `invite-${date}-${normalisePhone(phone)}-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+      name,
+      phone,
+      date,
+      time,
+      pax: "",
+      type: (params.get("festivalType") || params.get("type") || "").trim(),
+      bookingMode: (params.get("bookingMode") || "normal").trim(),
+      festivalType: (params.get("festivalType") || "").trim(),
+      table: (params.get("table") || "").trim(),
+      status: "Confirmed",
+      anniversary: "",
+      tag: "",
+      cover: coverFromType(params.get("festivalType") || params.get("type") || "", params.get("cover") || "auto"),
+      photo: "",
+      welcome: (params.get("welcome") || "").trim(),
+      dietary: "",
+      note: (params.get("note") || "").trim(),
+      createdAt: new Date().toISOString(),
+      source: "invitation-url"
+    };
+  }
+
+  function importBookingFromInvitationParams(params) {
+    const booking = bookingFromInvitationParams(params);
+    if (!booking) return false;
+    const bookings = getBookings();
+    const key = bookingKey(booking);
+    if (bookings.some((item) => bookingKey(item) === key)) return false;
+    bookings.push(booking);
+    saveBookings(bookings);
+    return true;
+  }
+
   function buildInviteMessage(booking, invitationUrl) {
-    return `您好 ${booking.name || "Guest"}，这是 La Taste x 3悦 为您准备的电子预订邀请函：${invitationUrl}`;
+    return [
+      "邀请函链接 / Invitation link:",
+      invitationUrl,
+      "",
+      `您好 ${booking.name || "Guest"}，这是 La Taste 3悦 为您准备的电子邀请函。`,
+      `Hi ${booking.name || "Guest"}, here is your invitation from La Taste 3悦.`
+    ].join("\n");
   }
 
   function buildConfirmMessage(booking) {
@@ -391,21 +521,20 @@
     const phone = normalisePhone(booking.phone);
     const confirmUrl = phone ? `https://wa.me/${phone}?text=${encodeURIComponent(buildConfirmMessage(booking))}` : "#";
     const invitationUrl = publicPageUrl("invitation.html");
-    ["name", "phone", "date", "time", "pax", "type", "host", "cover", "photo", "welcome", "note"].forEach((field) => {
-      const value = field === "note"
-        ? [booking.note, booking.dietary ? `忌口：${booking.dietary}` : ""].filter(Boolean).join(" / ")
-        : booking[field];
+    ["name", "date", "time", "table", "cover", "welcome", "bookingMode", "festivalType"].forEach((field) => {
+      const value = booking[field];
       if (value) invitationUrl.searchParams.set(field, value);
     });
 
     return `
       <article class="booking-item">
         <div class="booking-main">
-          <span class="status-dot ${booking.status.toLowerCase()}">${booking.status}</span>
+          <span class="status-dot ${(booking.status || "pending").toLowerCase()}">${booking.status || "Pending"}</span>
           <h3>${booking.time || "-"} · ${booking.name || "Guest"}</h3>
-          <p>${booking.table || "未安排桌位"} · ${booking.pax || "-"} pax · ${booking.type || "聚会"}</p>
+          <p>${booking.table || "未安排桌位"} · ${booking.pax || "-"} pax · ${booking.festivalType || booking.type || "普通预订"} · ${isFestivalBooking(booking) ? "节日预订" : "普通预订"}</p>
           <div class="tag-row">
             <span>${customer?.segment || "新客户"}</span>
+            ${booking.festivalType ? `<span>${booking.festivalType}</span>` : ""}
             ${booking.dietary ? `<span>忌口：${booking.dietary}</span>` : ""}
             ${booking.note ? `<span>${booking.note}</span>` : ""}
           </div>
@@ -413,6 +542,8 @@
         <div class="booking-actions">
           <a href="${confirmUrl}" target="_blank" rel="noopener">核餐</a>
           <a href="${invitationUrl.toString()}" target="_blank" rel="noopener">邀请函</a>
+          <button type="button" data-edit-booking="${booking.id}">修改</button>
+          <button type="button" data-delete-booking="${booking.id}">撤回</button>
         </div>
       </article>
     `;
@@ -535,6 +666,44 @@
       : `<div class="empty-state">还没有巡台记录。</div>`;
   }
 
+  function fillBookingForm(booking) {
+    if (!booking) return;
+    setValue("editingId", booking.id);
+    setValue("bookingMode", booking.bookingMode || (booking.festivalType ? "festival" : "normal"));
+    setValue("festivalType", booking.festivalType || "");
+    setValue("name", booking.name);
+    setValue("phone", booking.phone);
+    setValue("date", booking.date);
+    setValue("time", booking.time);
+    setValue("pax", booking.pax);
+    setValue("welcome", booking.welcome);
+    setValue("table", booking.table);
+    setValue("status", booking.status || "Pending");
+    setValue("anniversary", booking.anniversary);
+    setValue("tag", booking.tag);
+    setValue("dietary", booking.dietary);
+    setValue("note", booking.note);
+    const saveButton = $("#saveBooking");
+    if (saveButton) saveButton.textContent = "更新预订 / Update";
+    const cancelButton = $("#cancelEdit");
+    if (cancelButton) cancelButton.hidden = false;
+    updateLink();
+    switchTab("booking");
+  }
+
+  function deleteBooking(id) {
+    if (!id) return;
+    const bookings = getBookings();
+    const booking = bookings.find((item) => item.id === id);
+    if (!booking) return;
+    const ok = window.confirm(`撤回 ${booking.name || "Guest"} 的预订吗？\nCancel this reservation?`);
+    if (!ok) return;
+    saveBookings(bookings.filter((item) => item.id !== id));
+    if ($("#editingId")?.value === id) resetBookingForm();
+    $("#copyStatus").textContent = "预订已撤回。Reservation cancelled.";
+    renderAdmin();
+  }
+
   function renderAdmin() {
     const bookings = getBookings();
     const viewDate = $("#viewDate")?.value || todayIso();
@@ -553,6 +722,13 @@
     renderCustomers(customers);
     renderAnniversaries(customers);
     renderFloor(dayBookings);
+
+    $("#bookingList")?.querySelectorAll("[data-edit-booking]").forEach((button) => {
+      button.addEventListener("click", () => fillBookingForm(bookings.find((booking) => booking.id === button.dataset.editBooking)));
+    });
+    $("#bookingList")?.querySelectorAll("[data-delete-booking]").forEach((button) => {
+      button.addEventListener("click", () => deleteBooking(button.dataset.deleteBooking));
+    });
   }
 
   function initAdmin() {
@@ -565,20 +741,37 @@
     $$(".tab-btn").forEach((btn) => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
     form.addEventListener("input", updateLink);
     form.addEventListener("change", updateLink);
+    $("#bookingMode")?.addEventListener("change", () => {
+      if ($("#bookingMode").value === "festival" && !$("#festivalType")?.value) {
+        setValue("festivalType", "Birthday / 生日");
+      }
+      updateLink();
+    });
+    $("#festivalType")?.addEventListener("change", () => {
+      if ($("#festivalType").value) setValue("bookingMode", "festival");
+      updateLink();
+    });
     $("#viewDate")?.addEventListener("change", renderAdmin);
     $("#copyLink")?.addEventListener("click", () => copyText($("#generatedLink").value, $("#copyStatus"), "已复制邀请函链接。"));
+    $("#cancelEdit")?.addEventListener("click", resetBookingForm);
     $("#saveBooking")?.addEventListener("click", () => {
       const booking = bookingFromForm();
       if (!booking.name || !booking.phone || !booking.date || !booking.time) {
-        $("#copyStatus").textContent = "请至少填写姓名、电话、日期和时间。";
+        $("#copyStatus").textContent = "请至少填写姓名、电话、日期和时间。Please fill name, phone, date and time.";
         return;
       }
       const bookings = getBookings();
-      bookings.push(booking);
+      const existingIndex = bookings.findIndex((item) => item.id === booking.id);
+      if (existingIndex >= 0) {
+        bookings[existingIndex] = { ...bookings[existingIndex], ...booking, updatedAt: new Date().toISOString() };
+      } else {
+        bookings.push(booking);
+      }
       saveBookings(bookings);
       $("#viewDate").value = booking.date;
-      $("#copyStatus").textContent = "预订已保存到本机电子预订本。";
+      $("#copyStatus").textContent = "预订已保存到本机电子预订本，并自动记录到日历。Saved to local calendar.";
       renderAdmin();
+      resetBookingForm();
       switchTab("calendar");
     });
 
@@ -611,59 +804,141 @@
     if (el) el.textContent = text;
   }
 
+  function createInviteMusic(toggleButton) {
+    let audioContext;
+    let masterGain;
+    let timer;
+    let playing = false;
+    const melody = [523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 880, 698.46];
+
+    function ensureAudio() {
+      if (audioContext) return;
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      audioContext = new AudioContext();
+      masterGain = audioContext.createGain();
+      masterGain.gain.value = 0.045;
+      masterGain.connect(audioContext.destination);
+    }
+
+    function playNote(frequency, startTime, duration) {
+      if (!audioContext || !masterGain) return;
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(frequency, startTime);
+      gain.gain.setValueAtTime(0.0001, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.32, startTime + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+      osc.connect(gain);
+      gain.connect(masterGain);
+      osc.start(startTime);
+      osc.stop(startTime + duration + 0.04);
+    }
+
+    function playLoop() {
+      if (!playing || !audioContext) return;
+      const now = audioContext.currentTime + 0.02;
+      melody.forEach((note, index) => playNote(note, now + index * 0.34, 0.24));
+      timer = window.setTimeout(playLoop, melody.length * 340 + 850);
+    }
+
+    function start() {
+      ensureAudio();
+      if (!audioContext || playing) return;
+      audioContext.resume();
+      playing = true;
+      toggleButton?.classList.add("is-playing");
+      playLoop();
+    }
+
+    function stop() {
+      playing = false;
+      toggleButton?.classList.remove("is-playing");
+      if (timer) window.clearTimeout(timer);
+      timer = null;
+    }
+
+    function toggle() {
+      if (playing) stop();
+      else start();
+    }
+
+    return { start, stop, toggle };
+  }
+
   function initInvitation() {
     const params = new URLSearchParams(window.location.search);
+    importBookingFromInvitationParams(params);
     const guestName = valueOrDash(params.get("name") || "Guest");
-    const hostName = valueOrDash(params.get("host"));
-    const phone = valueOrDash(params.get("phone"));
     const date = valueOrDash(params.get("date"));
     const time = valueOrDash(params.get("time"));
-    const pax = valueOrDash(params.get("pax"));
-    const type = valueOrDash(params.get("type"));
-    const note = valueOrDash(params.get("note"));
+    const venue = valueOrDash(params.get("table"));
+    const type = valueOrDash(params.get("festivalType") || params.get("type"));
+    const bookingMode = (params.get("bookingMode") || "normal").trim();
+    const festivalType = (params.get("festivalType") || "").trim();
+    const displayType = festivalType || (type === "-" ? "Normal Reservation / 普通预订" : type);
     const customWelcome = valueOrDash(params.get("welcome"));
-    const coverKey = coverFromType(type, params.get("cover") || "auto");
-    const photoUrl = valueOrDash(params.get("photo"));
-    const shareBtn = $("#shareInvite");
+    const coverKey = coverFromType(displayType, params.get("cover") || "auto");
     const copyInviteBtn = $("#copyInviteLink");
     const shareWhatsappBtn = $("#shareInviteWhatsapp");
+    const shareWhatsappTop = $("#shareInviteWhatsappTop");
     const inviteLinkOutput = $("#inviteLinkOutput");
     const shareStatus = $("#shareStatus");
     const mapBtn = document.querySelector("[data-map-link]");
-    const whatsappBtn = document.querySelector("[data-whatsapp-link]");
     const inviteCover = $("#inviteCover");
-    const welcome = welcomeByType(type, hostName === "-" ? "" : hostName);
+    const envelopeStage = $(".invite-envelope-stage");
+    const openEnvelopeBtn = $("#openInviteEnvelope");
+    const musicToggle = $("#inviteMusicToggle");
+    const stageLabel = $("#inviteStageLabel");
+    const inviteMusic = createInviteMusic(musicToggle);
+    const partyName = guestName;
+    const isFestival = bookingMode === "festival" || festivalType;
+    const welcome = welcomeByType(displayType, partyName === "-" ? "" : partyName);
+    const normalMessage = [
+      `您好 ${guestName === "-" ? "Guest" : guestName}，这是您的 La Taste 3悦 预订确认。`,
+      "Hi, this is your La Taste 3悦 booking confirmation.",
+      "请按以下日期、时间和地点前来。"
+    ].join("\n");
 
-    const coverUrl = photoUrl !== "-" ? photoUrl : coverImages[coverKey] || coverImages.restaurant;
+    const coverUrl = coverImages[coverKey] || coverImages.restaurant;
     if (inviteCover) {
       inviteCover.style.backgroundImage = `linear-gradient(rgba(23, 63, 52, 0.1), rgba(23, 63, 52, 0.1)), url("${coverUrl}")`;
     }
 
+    if (envelopeStage) {
+      envelopeStage.classList.toggle("normal-invite", !isFestival);
+      envelopeStage.classList.toggle("festival-invite", isFestival);
+      if (!isFestival) envelopeStage.classList.add("is-open");
+    }
+    if (openEnvelopeBtn && !isFestival) openEnvelopeBtn.hidden = true;
+    if (musicToggle && !isFestival) musicToggle.hidden = true;
+
+    if (stageLabel) stageLabel.textContent = isFestival ? "Event Invitation" : "Booking Confirmation";
+    setText("inviteModeLabel", isFestival ? "Party Invitation / 节日邀请函" : "");
     setText("inviteHeadline", welcome.headline);
-    setText("inviteHost", hostName === "-" ? "A Warm Invitation" : `Hosted by ${hostName}`);
-    setText("inviteSubline", type === "-" ? "悦人 · 悦己 · 悦食" : type);
-    setText("welcomeTitle", welcome.title);
-    setText("welcomeMessage", customWelcome === "-" ? welcome.message : customWelcome);
+    setText("inviteSubline", displayType === "-" ? "悦人 · 悦己 · 悦食" : displayType);
+    setText("welcomeTitle", isFestival ? welcome.title : "La Taste 3悦 预订确认 / Booking Confirmation");
+    setText("welcomeMessage", isFestival ? (customWelcome === "-" ? welcome.message : customWelcome) : normalMessage);
     setText("publicEventDate", date === "-" ? "日期待确认" : date);
     setText("publicEventTime", time === "-" ? "时间待确认" : time);
-    setText("publicEventType", type === "-" ? "Private Event" : type);
-    setText("guestName", guestName);
-    setText("guestPhone", phone);
-    setText("eventDate", date);
-    setText("eventTime", time);
-    setText("eventPax", pax === "-" ? "-" : `${pax} pax`);
-    setText("eventType", type);
-    setText("eventNote", note);
+    setText("publicEventVenue", venue === "-" ? "La Taste Event Space" : venue);
 
     if (mapBtn) mapBtn.href = mapsUrl;
-    if (whatsappBtn) {
-      const message = "您好，我想询问 La Taste x 3悦 活动预订。";
-      whatsappBtn.href = `https://wa.me/${restaurantWhatsapp}?text=${encodeURIComponent(message)}`;
-    }
 
-    const inviteUrl = isLocalPreview() ? publicPageUrl(`invitation.html${window.location.search}`).toString() : window.location.href;
-    const localNotice = "已改用 Netlify 正式链接。请确认 Netlify 站点已经发布后再发给顾客。";
-    const inviteMessage = `${welcome.headline} - ${hostName === "-" ? guestName : hostName}\n${customWelcome === "-" ? welcome.message : customWelcome}\n${inviteUrl}`;
+    const inviteUrl = window.location.href;
+    const localNotice = "本地邀请函链接已复制。发给别人之前，需要同一台电脑或部署到网上才可打开。";
+    const inviteMessage = [
+      "邀请函链接 / Invitation link:",
+      inviteUrl,
+      "",
+      `${isFestival ? welcome.headline : "La Taste 3悦 Booking Confirmation"} - ${partyName === "-" ? guestName : partyName}`,
+      isFestival ? (customWelcome === "-" ? welcome.message : customWelcome) : normalMessage,
+      `Date: ${date === "-" ? "TBC" : date}`,
+      `Time: ${time === "-" ? "TBC" : time}`,
+      `Venue: ${venue === "-" ? "La Taste Event Space" : venue}`,
+      `Event: ${displayType}`
+    ].join("\n");
 
     if (inviteLinkOutput) {
       inviteLinkOutput.value = inviteUrl;
@@ -674,12 +949,26 @@
       shareWhatsappBtn.href = `https://wa.me/?text=${encodeURIComponent(inviteMessage)}`;
       shareWhatsappBtn.textContent = "WhatsApp 分享邀请函";
     }
+    if (shareWhatsappTop) {
+      shareWhatsappTop.href = `https://wa.me/?text=${encodeURIComponent(inviteMessage)}`;
+    }
 
     if (copyInviteBtn) {
       copyInviteBtn.addEventListener("click", () => {
         copyText(inviteUrl, shareStatus, isLocalPreview() ? localNotice : "邀请函链接已复制，可以直接粘贴到 WhatsApp。");
         if (inviteLinkOutput) inviteLinkOutput.select();
       });
+    }
+
+    if (openEnvelopeBtn && envelopeStage) {
+      openEnvelopeBtn.addEventListener("click", () => {
+        envelopeStage.classList.add("is-open");
+        inviteMusic.start();
+      });
+    }
+
+    if (musicToggle) {
+      musicToggle.addEventListener("click", () => inviteMusic.toggle());
     }
   }
 

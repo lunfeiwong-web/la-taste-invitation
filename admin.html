@@ -16,7 +16,7 @@
       <div>
         <a class="mini-link" href="index.html">La Taste x 3悦</a>
         <h1>电子预订本</h1>
-        <p>日历、桌位、熟客备注、核餐确认和客户提醒，手机打开就能看清楚。</p>
+        <p>Reservation calendar, guest invitations, table notes and customer reminders. 员工手机打开就能看清楚。</p>
       </div>
       <div class="today-chip">
         <span id="todayLabel">Today</span>
@@ -47,15 +47,15 @@
 
         <div class="metric-grid">
           <article class="metric">
-            <span>总预订</span>
+            <span>总预订 / Bookings</span>
             <strong id="metricBookings">0</strong>
           </article>
           <article class="metric">
-            <span>总人数</span>
+            <span>总人数 / Pax</span>
             <strong id="metricPax">0</strong>
           </article>
           <article class="metric">
-            <span>已确认</span>
+            <span>已确认 / Confirmed</span>
             <strong id="metricConfirmed">0</strong>
           </article>
         </div>
@@ -88,95 +88,77 @@
     <section class="tab-panel" id="booking">
       <section class="admin-card reveal">
         <p class="section-kicker">New Booking</p>
-        <h2>新增预订</h2>
+        <h2>新增预订 / New Reservation</h2>
         <form id="bookingForm" class="booking-form">
+          <input id="editingId" name="editingId" type="hidden">
+
+          <div class="form-grid">
+            <label>
+              <span>预订类型 / Booking Mode</span>
+              <select id="bookingMode" name="bookingMode">
+                <option value="normal">普通预订 / Normal</option>
+                <option value="festival">节日预订 / Party</option>
+              </select>
+            </label>
+
+            <label>
+              <span>节日类型 / Party Type</span>
+              <select id="festivalType" name="festivalType">
+                <option value="">不适用 / Not applicable</option>
+                <option>Birthday / 生日</option>
+                <option>Baby Full Moon / 满月</option>
+                <option>Gender Reveal / 猜男孩还是女孩</option>
+                <option>Wedding / ROM</option>
+                <option>Company Celebration / 公司庆祝</option>
+                <option>Private Party / 私人派对</option>
+              </select>
+            </label>
+          </div>
+
           <label>
-            <span>顾客姓名</span>
+            <span>顾客姓名 / Customer Name</span>
             <input id="name" name="name" type="text" placeholder="例如：Mr Tan" autocomplete="name">
           </label>
 
           <label>
-            <span>电话号码</span>
+            <span>电话号码 / Phone</span>
             <input id="phone" name="phone" type="tel" placeholder="例如：0123456789" autocomplete="tel">
           </label>
 
           <div class="form-grid">
             <label>
-              <span>日期</span>
+              <span>日期 / Date</span>
               <input id="date" name="date" type="date">
             </label>
 
             <label>
-              <span>时间</span>
+              <span>时间 / Time</span>
               <input id="time" name="time" type="text" placeholder="例如：7:00pm">
             </label>
           </div>
 
-          <div class="form-grid">
-            <label>
-              <span>人数</span>
-              <input id="pax" name="pax" type="number" min="1" placeholder="例如：10">
-            </label>
-
-            <label>
-              <span>活动类型</span>
-              <select id="type" name="type">
-                <option value="">请选择</option>
-                <option>Birthday</option>
-                <option>Baby Full Moon</option>
-                <option>Company Dinner</option>
-                <option>Product Launch</option>
-                <option>Workshop</option>
-                <option>Private Gathering</option>
-                <option>Wedding / ROM</option>
-                <option>Others</option>
-              </select>
-            </label>
-          </div>
-
-          <div class="form-grid">
-            <label>
-              <span>宴会主人 / 邀请人</span>
-              <input id="host" name="host" type="text" placeholder="例如：Tan Family / Mr & Mrs Tan">
-            </label>
-
-            <label>
-              <span>邀请函封面照片</span>
-              <select id="cover" name="cover">
-                <option value="auto">按照活动类型自动选择</option>
-                <option value="birthday">生日宴会背景</option>
-                <option value="baby">宝宝满月 / 捉周背景</option>
-                <option value="company">公司聚餐 / 产品发布背景</option>
-                <option value="wedding">婚礼 / ROM 背景</option>
-                <option value="restaurant">La Taste 门面背景</option>
-              </select>
-            </label>
-          </div>
-
           <label>
-            <span>顾客自己的照片链接（可选）</span>
-            <input id="photo" name="photo" type="url" placeholder="照片先上传到网上，再贴图片链接；留空就用上面主题照片">
+            <span>人数 / Pax</span>
+            <input id="pax" name="pax" type="number" min="1" placeholder="例如：10">
           </label>
 
           <label>
-            <span>给宾客看的欢迎词</span>
-            <textarea id="welcome" name="welcome" rows="4" placeholder="留空时系统会按照活动类型自动写一段温暖邀请文案"></textarea>
+            <span>给宾客看的欢迎词 / Guest Message</span>
+            <textarea id="welcome" name="welcome" rows="4" placeholder="可留空。节日预订会自动生成温馨双语信纸。"></textarea>
           </label>
 
           <div class="form-grid">
             <label>
-              <span>桌位 / 包厢</span>
+              <span>桌位 / 包厢 / Area</span>
               <select id="table" name="table">
                 <option value="">未安排</option>
-                <option>Event Space 1</option>
-                <option>阁楼</option>
-                <option>Event Space C</option>
-                <option>Event Space D</option>
+                <option>La Taste X 3 悦</option>
+                <option>La Taste Event Space</option>
               </select>
             </label>
 
             <label>
-              <span>状态</span>
+              <span>状态 / Status</span>
               <select id="status" name="status">
                 <option>Pending</option>
                 <option>Confirmed</option>
@@ -188,12 +170,12 @@
 
           <div class="form-grid">
             <label>
-              <span>纪念日</span>
+              <span>纪念日 / Anniversary</span>
               <input id="anniversary" name="anniversary" type="date">
             </label>
 
             <label>
-              <span>客户标签</span>
+              <span>客户标签 / Customer Tag</span>
               <select id="tag" name="tag">
                 <option value="">自动判断</option>
                 <option>熟客</option>
@@ -205,18 +187,19 @@
           </div>
 
           <label>
-            <span>忌口 / 过敏</span>
+            <span>忌口 / 过敏 / Allergy</span>
             <input id="dietary" name="dietary" type="text" placeholder="例如：不吃牛、花生过敏">
           </label>
 
           <label>
-            <span>备注</span>
+            <span>备注 / Notes</span>
             <textarea id="note" name="note" rows="4" placeholder="例如：需要靠近舞台、加毛巾、宝宝椅"></textarea>
           </label>
 
           <div class="button-row">
-            <button id="saveBooking" class="btn btn-primary" type="button">保存预订</button>
-            <button id="copyLink" class="btn btn-ghost-dark" type="button">复制邀请函</button>
+            <button id="saveBooking" class="btn btn-primary" type="button">保存预订 / Save</button>
+            <button id="cancelEdit" class="btn btn-ghost-dark" type="button" hidden>取消修改 / Cancel</button>
+            <button id="copyLink" class="btn btn-ghost-dark" type="button">复制邀请函 / Copy</button>
           </div>
         </form>
       </section>
@@ -281,6 +264,6 @@
     </section>
   </main>
 
-  <script src="script.js?v=netlify-20260713"></script>
+  <script src="script.js?v=local-booking-20260925"></script>
 </body>
 </html>
