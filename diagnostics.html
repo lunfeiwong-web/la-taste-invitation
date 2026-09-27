@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>预订记录诊断 | La Taste 3悦</title>
+  <style>
+    body {
+      margin: 0;
+      background: #173f34;
+      color: #173f34;
+      font-family: Arial, "Microsoft YaHei", sans-serif;
+    }
+
+    main {
+      width: min(960px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 24px 0 44px;
+    }
+
+    header,
+    .card {
+      border-radius: 20px;
+      padding: 18px;
+      background: #fff8e8;
+      margin-bottom: 14px;
+    }
+
+    h1,
+    h2 {
+      margin: 0 0 10px;
+    }
+
+    p {
+      margin: 0;
+      line-height: 1.55;
+      color: #5f6e66;
+    }
+
+    input,
+    button {
+      border-radius: 999px;
+      border: 1px solid rgba(23, 63, 52, 0.18);
+      padding: 10px 13px;
+      font: inherit;
+      font-weight: 700;
+    }
+
+    button {
+      background: #c99a45;
+      color: white;
+      cursor: pointer;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      border: 1px solid rgba(23, 63, 52, 0.14);
+      border-radius: 14px;
+      padding: 14px;
+      background: rgba(255, 255, 255, 0.58);
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 2rem;
+    }
+
+    .booking {
+      display: grid;
+      gap: 6px;
+      border: 1px solid rgba(23, 63, 52, 0.14);
+      border-radius: 14px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.62);
+      margin-top: 10px;
+    }
+
+    .booking strong {
+      font-size: 1.05rem;
+    }
+
+    .warn {
+      color: #9b4a00;
+      font-weight: 800;
+    }
+
+    code {
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: #173f34;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>预订记录诊断</h1>
+      <p>这个页面只读取当前设备、当前网址里的浏览器记录，不会上传资料。用它来检查 26/10 是否真的保存进这一个后台。</p>
+      <div class="controls">
+        <input id="targetDate" type="date" value="2026-10-26">
+        <button id="runCheck" type="button">检查这个日期</button>
+      </div>
+    </header>
+
+    <section class="card">
+      <h2>结果</h2>
+      <div id="summary" class="summary"></div>
+      <div id="explain"></div>
+    </section>
+
+    <section class="card">
+      <h2>符合日期的记录</h2>
+      <div id="matches"></div>
+    </section>
+
+    <section class="card">
+      <h2>全部记录</h2>
+      <div id="allRows"></div>
+    </section>
+  </main>
+
+  <script>
+    const storageKey = "laTasteBookingsV2";
+
+    function readRows() {
+      try {
+        return JSON.parse(localStorage.getItem(storageKey) || "[]");
+      } catch (error) {
+        return { error: String(error) };
+      }
+    }
+
+    function renderBooking(booking) {
+      return `
+        <article class="booking">
+          <strong>${booking.name || "No name"} · ${booking.date || "No date"} · ${booking.time || "-"}</strong>
+          <span>${booking.table || "No area"} · ${booking.pax || "-"} pax · ${booking.festivalType || booking.type || "Normal"}</span>
+          <span>Phone: ${booking.phone || "-"}</span>
+          <span>Created: ${booking.createdAt || "-"}</span>
+        </article>
+      `;
+    }
+
+    function runCheck() {
+      const target = document.getElementById("targetDate").value || "2026-10-26";
+      const data = readRows();
+      if (data.error) {
+        document.getElementById("summary").innerHTML = `<div class="metric"><span>读取错误</span><strong>!</strong></div>`;
+        document.getElementById("explain").innerHTML = `<p class="warn">${data.error}</p>`;
+        return;
+      }
+
+      const rows = Array.isArray(data) ? data : [];
+      const matches = rows.filter((booking) => booking.date === target);
+      const nonIso = rows.filter((booking) => booking.date && !/^\d{4}-\d{2}-\d{2}$/.test(booking.date));
+      const noDate = rows.filter((booking) => !booking.date);
+      const byDate = rows.reduce((acc, booking) => {
+        const key = booking.date || "(empty)";
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+      }, {});
+
+      document.getElementById("summary").innerHTML = `
+        <div class="metric"><span>总记录</span><strong>${rows.length}</strong></div>
+        <div class="metric"><span>${target}</span><strong>${matches.length}</strong></div>
+        <div class="metric"><span>日期格式不标准</span><strong>${nonIso.length}</strong></div>
+        <div class="metric"><span>没有日期</span><strong>${noDate.length}</strong></div>
+      `;
+
+      document.getElementById("explain").innerHTML = matches.length
+        ? `<p>这个设备里有 ${matches.length} 笔 ${target} 的记录。如果后台日历仍显示 0，就是显示逻辑有问题。</p>`
+        : `<p class="warn">这个设备里没有 date 精确等于 ${target} 的记录。后台显示 0 是因为它只显示日期完全相同的记录。</p><p><code>${JSON.stringify(byDate, null, 2)}</code></p>`;
+
+      document.getElementById("matches").innerHTML = matches.length
+        ? matches.map(renderBooking).join("")
+        : `<p>没有符合日期的记录。</p>`;
+
+      document.getElementById("allRows").innerHTML = rows.length
+        ? rows.slice().sort((a, b) => String(a.date || "").localeCompare(String(b.date || ""))).map(renderBooking).join("")
+        : `<p>这个网址下没有任何员工保存的预订记录。</p>`;
+    }
+
+    document.getElementById("runCheck").addEventListener("click", runCheck);
+    runCheck();
+  </script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>派对邀请函音乐试听 | La Taste 3悦</title>
+  <style>
+    :root {
+      --green: #173f34;
+      --gold: #c99a45;
+      --cream: #fff8e8;
+      --ink: #21352f;
+      --muted: #6a756f;
+      --pink: #f5aabc;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(180deg, rgba(23, 63, 52, 0.95), rgba(23, 63, 52, 0.82)),
+        #173f34;
+      color: var(--ink);
+      font-family: Arial, "Microsoft YaHei", sans-serif;
+    }
+
+    main {
+      width: min(920px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 28px 0 44px;
+    }
+
+    header {
+      color: white;
+      margin-bottom: 18px;
+    }
+
+    header span {
+      color: #f5d996;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 8px 0 8px;
+      font-size: clamp(2rem, 8vw, 4rem);
+      line-height: 1.05;
+    }
+
+    header p {
+      max-width: 680px;
+      margin: 0;
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .track {
+      display: grid;
+      gap: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.34);
+      border-radius: 18px;
+      padding: 18px;
+      background: rgba(255, 248, 232, 0.96);
+      box-shadow: 0 22px 52px rgba(0, 0, 0, 0.18);
+    }
+
+    .track h2 {
+      margin: 0;
+      color: var(--green);
+      font-size: 1.25rem;
+    }
+
+    .track p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 11px 16px;
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .play {
+      background: var(--green);
+      color: white;
+    }
+
+    .stop {
+      background: rgba(23, 63, 52, 0.12);
+      color: var(--green);
+    }
+
+    .choose {
+      background: var(--gold);
+      color: white;
+    }
+
+    #status {
+      position: sticky;
+      bottom: 0;
+      margin-top: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.38);
+      border-radius: 18px;
+      padding: 14px 16px;
+      background: rgba(255, 248, 232, 0.94);
+      color: var(--green);
+      font-weight: 800;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <span>La Taste 3悦 Party Invitation</span>
+      <h1>派对邀请函音乐试听</h1>
+      <p>先试听，再告诉我你要哪一首。我会把选中的旋律固定进派对预订邀请函，不放到后台让员工每天选。</p>
+    </header>
+
+    <section class="grid" id="trackList"></section>
+    <div id="status">点击任一首试听。手机可能需要先点一次播放才会出声。</div>
+  </main>
+
+  <script>
+    const tracks = [
+      {
+        id: "warm",
+        name: "A. 温馨开信 / Warm Envelope",
+        note: "柔和、适合生日、家庭聚会和一般派对。",
+        melody: [523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 880, 698.46],
+        rhythm: 0.34,
+        wave: "sine"
+      },
+      {
+        id: "baby",
+        name: "B. Baby / Gender Reveal",
+        note: "更可爱、轻一点，适合满月和猜男孩女孩。",
+        melody: [659.25, 783.99, 880, 783.99, 659.25, 587.33, 659.25, 783.99],
+        rhythm: 0.3,
+        wave: "triangle"
+      },
+      {
+        id: "birthday",
+        name: "C. 生日派对感 / Birthday Cheer",
+        note: "比较开心，但不是直接用生日歌，避免版权和太俗。",
+        melody: [523.25, 523.25, 659.25, 523.25, 783.99, 698.46, 659.25, 587.33],
+        rhythm: 0.26,
+        wave: "sine"
+      },
+      {
+        id: "romantic",
+        name: "D. 浪漫轻柔 / Romantic Soft",
+        note: "慢一点、比较优雅，适合 ROM、婚礼和正式晚宴。",
+        melody: [440, 523.25, 659.25, 783.99, 739.99, 659.25, 587.33, 523.25],
+        rhythm: 0.42,
+        wave: "sine"
+      }
+    ];
+
+    let audioContext;
+    let masterGain;
+    let stopTimer;
+    let activeOscillators = [];
+
+    function ensureAudio() {
+      if (audioContext) return;
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      audioContext = new AudioContext();
+      masterGain = audioContext.createGain();
+      masterGain.gain.value = 0.055;
+      masterGain.connect(audioContext.destination);
+    }
+
+    function stopAll() {
+      if (stopTimer) window.clearTimeout(stopTimer);
+      stopTimer = null;
+      activeOscillators.forEach((osc) => {
+        try { osc.stop(); } catch (error) {}
+      });
+      activeOscillators = [];
+    }
+
+    function playTrack(track) {
+      ensureAudio();
+      stopAll();
+      audioContext.resume();
+      const now = audioContext.currentTime + 0.04;
+      track.melody.forEach((frequency, index) => {
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        const start = now + index * track.rhythm;
+        const duration = track.rhythm * 0.72;
+        osc.type = track.wave;
+        osc.frequency.setValueAtTime(frequency, start);
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(0.35, start + 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+        osc.connect(gain);
+        gain.connect(masterGain);
+        osc.start(start);
+        osc.stop(start + duration + 0.04);
+        activeOscillators.push(osc);
+      });
+      stopTimer = window.setTimeout(stopAll, track.melody.length * track.rhythm * 1000 + 500);
+      document.getElementById("status").textContent = `正在试听：${track.name}`;
+    }
+
+    function chooseTrack(track) {
+      document.getElementById("status").textContent = `你可以告诉我：选 ${track.name}`;
+    }
+
+    document.getElementById("trackList").innerHTML = tracks.map((track) => `
+      <article class="track">
+        <h2>${track.name}</h2>
+        <p>${track.note}</p>
+        <div class="actions">
+          <button class="play" type="button" data-play="${track.id}">试听</button>
+          <button class="stop" type="button" data-stop>停止</button>
+          <button class="choose" type="button" data-choose="${track.id}">我喜欢这首</button>
+        </div>
+      </article>
+    `).join("");
+
+    document.addEventListener("click", (event) => {
+      const playId = event.target.dataset.play;
+      const chooseId = event.target.dataset.choose;
+      if (playId) playTrack(tracks.find((track) => track.id === playId));
+      if (chooseId) chooseTrack(tracks.find((track) => track.id === chooseId));
+      if (event.target.dataset.stop !== undefined) {
+        stopAll();
+        document.getElementById("status").textContent = "已停止。";
+      }
+    });
+  </script>
+</body>
+</html>
