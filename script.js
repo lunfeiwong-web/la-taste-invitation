@@ -805,7 +805,7 @@
   }
 
   function createInviteMusic(toggleButton) {
-    const audio = new Audio("audio/happy-birthday-party-bgm-alex-morgan.mp3?v=correct-song-20260927");
+    const audio = new Audio("audio/paulyudin-happy-birthday-birthday-music-595942.mp3?v=paulyudin-20260927");
     audio.loop = true;
     audio.preload = "auto";
     audio.volume = 0.72;
