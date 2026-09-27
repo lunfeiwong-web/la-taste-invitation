@@ -134,7 +134,7 @@
     <header>
       <span>La Taste 3悦 Party Invitation</span>
       <h1>派对邀请函音乐试听</h1>
-      <p>第二版试听：这次会有和弦，不只是单音提示音。先试听，再告诉我你要哪一首。</p>
+      <p>已选用真实歌曲版本，不再使用浏览器合成铃声。点击试听确认声音。</p>
     </header>
 
     <section class="grid" id="trackList"></section>
@@ -142,140 +142,51 @@
   </main>
 
   <script>
-    const tracks = [
-      {
-        id: "dream",
-        name: "E. 梦幻开信 / Dreamy Reveal",
-        note: "比较梦幻，适合信封打开那一刻。",
-        melody: [783.99, 987.77, 1174.66, 987.77, 880, 783.99, 659.25, 783.99],
-        chords: [[261.63, 329.63, 392], [293.66, 349.23, 440], [329.63, 392, 493.88], [261.63, 329.63, 392]],
-        rhythm: 0.38,
-        wave: "sine",
-        gain: 0.05
-      },
-      {
-        id: "piano",
-        name: "F. 钢琴感邀请 / Soft Piano",
-        note: "正式、干净，适合大多数派对，不会太可爱。",
-        melody: [659.25, 587.33, 523.25, 587.33, 659.25, 783.99, 739.99, 659.25],
-        chords: [[220, 329.63, 440], [246.94, 349.23, 493.88], [261.63, 392, 523.25], [220, 329.63, 440]],
-        rhythm: 0.44,
-        wave: "triangle",
-        gain: 0.052
-      },
-      {
-        id: "gender-pop",
-        name: "G. 揭晓瞬间 / Reveal Pop",
-        note: "比较有期待感，适合 Gender Reveal 和宝宝派对。",
-        melody: [523.25, 587.33, 659.25, 783.99, 1046.5, 987.77, 880, 1046.5],
-        chords: [[261.63, 392, 523.25], [293.66, 440, 587.33], [329.63, 493.88, 659.25], [392, 523.25, 783.99]],
-        rhythm: 0.28,
-        wave: "triangle",
-        gain: 0.05
-      },
-      {
-        id: "party-light",
-        name: "H. 轻快派对 / Light Party",
-        note: "比较开心，适合生日和私人派对。",
-        melody: [659.25, 783.99, 659.25, 880, 783.99, 659.25, 587.33, 659.25, 783.99, 987.77],
-        chords: [[261.63, 329.63, 392], [349.23, 440, 523.25], [392, 493.88, 587.33], [329.63, 392, 493.88]],
-        rhythm: 0.24,
-        wave: "square",
-        gain: 0.035
-      },
-      {
-        id: "dinner",
-        name: "I. 优雅晚宴 / Elegant Dinner",
-        note: "成熟一点，适合正式晚宴、ROM 或公司庆祝。",
-        melody: [440, 493.88, 523.25, 659.25, 587.33, 523.25, 493.88, 440],
-        chords: [[220, 277.18, 329.63], [196, 246.94, 293.66], [174.61, 220, 261.63], [220, 277.18, 329.63]],
-        rhythm: 0.5,
-        wave: "sine",
-        gain: 0.055
-      }
-    ];
+    const track = {
+      id: "pixabay-birthday",
+      name: "Happy Birthday Party BGM — alex-morgan",
+      note: "Pixabay 音乐，40 秒 MP3，适合生日和派对邀请函。现在派对预定的信封打开后会播放这首。",
+      file: "audio/happy-birthday-party-bgm-alex-morgan.mp3",
+      source: "https://pixabay.com/music/happy-childrens-tunes-happy-birthday-party-bgm-579467/"
+    };
 
-    let audioContext;
-    let masterGain;
-    let stopTimer;
-    let activeOscillators = [];
-
-    function ensureAudio() {
-      if (audioContext) return;
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      audioContext = new AudioContext();
-      masterGain = audioContext.createGain();
-      masterGain.gain.value = 0.07;
-      masterGain.connect(audioContext.destination);
-    }
+    const player = new Audio(track.file);
+    player.loop = true;
+    player.volume = 0.72;
 
     function stopAll() {
-      if (stopTimer) window.clearTimeout(stopTimer);
-      stopTimer = null;
-      activeOscillators.forEach((osc) => {
-        try { osc.stop(); } catch (error) {}
-      });
-      activeOscillators = [];
+      player.pause();
+      player.currentTime = 0;
     }
 
-    function playTrack(track) {
-      ensureAudio();
-      stopAll();
-      audioContext.resume();
-      const now = audioContext.currentTime + 0.04;
-      function scheduleTone(frequency, start, duration, wave, peak, detune) {
-        const osc = audioContext.createOscillator();
-        const gain = audioContext.createGain();
-        osc.type = wave;
-        osc.frequency.setValueAtTime(frequency, start);
-        osc.detune.value = detune || 0;
-        gain.gain.setValueAtTime(0.0001, start);
-        gain.gain.exponentialRampToValueAtTime(peak, start + 0.04);
-        gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
-        osc.connect(gain);
-        gain.connect(masterGain);
-        osc.start(start);
-        osc.stop(start + duration + 0.04);
-        activeOscillators.push(osc);
-      }
-
-      track.chords.forEach((chord, index) => {
-        const start = now + index * track.rhythm * 2;
-        chord.forEach((frequency, noteIndex) => {
-          scheduleTone(frequency, start, track.rhythm * 1.75, "sine", 0.055, noteIndex * 3);
-        });
+    function playTrack() {
+      player.play().then(() => {
+        document.getElementById("status").textContent = `正在试听：${track.name}`;
+      }).catch(() => {
+        document.getElementById("status").textContent = "手机或浏览器拦截了播放，请再点一次试听。";
       });
-
-      track.melody.forEach((frequency, index) => {
-        const start = now + index * track.rhythm;
-        const duration = track.rhythm * 0.72;
-        scheduleTone(frequency, start, duration, track.wave, track.gain, 0);
-      });
-      stopTimer = window.setTimeout(stopAll, track.melody.length * track.rhythm * 1000 + 500);
-      document.getElementById("status").textContent = `正在试听：${track.name}`;
     }
 
-    function chooseTrack(track) {
-      document.getElementById("status").textContent = `你可以告诉我：选 ${track.name}`;
+    function chooseTrack() {
+      document.getElementById("status").textContent = `已选：${track.name}`;
     }
 
-    document.getElementById("trackList").innerHTML = tracks.map((track) => `
+    document.getElementById("trackList").innerHTML = `
       <article class="track">
         <h2>${track.name}</h2>
         <p>${track.note}</p>
+        <p><a href="${track.source}" target="_blank" rel="noopener">Pixabay 来源页面</a></p>
         <div class="actions">
-          <button class="play" type="button" data-play="${track.id}">试听</button>
+          <button class="play" type="button" data-play>试听</button>
           <button class="stop" type="button" data-stop>停止</button>
-          <button class="choose" type="button" data-choose="${track.id}">我喜欢这首</button>
+          <button class="choose" type="button" data-choose>我喜欢这首</button>
         </div>
       </article>
-    `).join("");
+    `;
 
     document.addEventListener("click", (event) => {
-      const playId = event.target.dataset.play;
-      const chooseId = event.target.dataset.choose;
-      if (playId) playTrack(tracks.find((track) => track.id === playId));
-      if (chooseId) chooseTrack(tracks.find((track) => track.id === chooseId));
+      if (event.target.dataset.play !== undefined) playTrack();
+      if (event.target.dataset.choose !== undefined) chooseTrack();
       if (event.target.dataset.stop !== undefined) {
         stopAll();
         document.getElementById("status").textContent = "已停止。";
@@ -284,3 +195,4 @@
   </script>
 </body>
 </html>
+

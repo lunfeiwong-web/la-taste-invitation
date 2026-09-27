@@ -805,58 +805,29 @@
   }
 
   function createInviteMusic(toggleButton) {
-    let audioContext;
-    let masterGain;
-    let timer;
+    const audio = new Audio("audio/happy-birthday-party-bgm-alex-morgan.mp3");
+    audio.loop = true;
+    audio.preload = "auto";
+    audio.volume = 0.72;
     let playing = false;
-    const melody = [523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 880, 698.46];
-
-    function ensureAudio() {
-      if (audioContext) return;
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContext) return;
-      audioContext = new AudioContext();
-      masterGain = audioContext.createGain();
-      masterGain.gain.value = 0.045;
-      masterGain.connect(audioContext.destination);
-    }
-
-    function playNote(frequency, startTime, duration) {
-      if (!audioContext || !masterGain) return;
-      const osc = audioContext.createOscillator();
-      const gain = audioContext.createGain();
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(frequency, startTime);
-      gain.gain.setValueAtTime(0.0001, startTime);
-      gain.gain.exponentialRampToValueAtTime(0.32, startTime + 0.04);
-      gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
-      osc.connect(gain);
-      gain.connect(masterGain);
-      osc.start(startTime);
-      osc.stop(startTime + duration + 0.04);
-    }
-
-    function playLoop() {
-      if (!playing || !audioContext) return;
-      const now = audioContext.currentTime + 0.02;
-      melody.forEach((note, index) => playNote(note, now + index * 0.34, 0.24));
-      timer = window.setTimeout(playLoop, melody.length * 340 + 850);
-    }
 
     function start() {
-      ensureAudio();
-      if (!audioContext || playing) return;
-      audioContext.resume();
+      if (playing) return;
       playing = true;
       toggleButton?.classList.add("is-playing");
-      playLoop();
+      const playPromise = audio.play();
+      if (playPromise?.catch) {
+        playPromise.catch(() => {
+          playing = false;
+          toggleButton?.classList.remove("is-playing");
+        });
+      }
     }
 
     function stop() {
       playing = false;
       toggleButton?.classList.remove("is-playing");
-      if (timer) window.clearTimeout(timer);
-      timer = null;
+      audio.pause();
     }
 
     function toggle() {
