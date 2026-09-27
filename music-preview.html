@@ -134,7 +134,7 @@
     <header>
       <span>La Taste 3悦 Party Invitation</span>
       <h1>派对邀请函音乐试听</h1>
-      <p>先试听，再告诉我你要哪一首。我会把选中的旋律固定进派对预订邀请函，不放到后台让员工每天选。</p>
+      <p>第二版试听：这次会有和弦，不只是单音提示音。先试听，再告诉我你要哪一首。</p>
     </header>
 
     <section class="grid" id="trackList"></section>
@@ -144,36 +144,54 @@
   <script>
     const tracks = [
       {
-        id: "warm",
-        name: "A. 温馨开信 / Warm Envelope",
-        note: "柔和、适合生日、家庭聚会和一般派对。",
-        melody: [523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 880, 698.46],
-        rhythm: 0.34,
-        wave: "sine"
+        id: "dream",
+        name: "E. 梦幻开信 / Dreamy Reveal",
+        note: "比较梦幻，适合信封打开那一刻。",
+        melody: [783.99, 987.77, 1174.66, 987.77, 880, 783.99, 659.25, 783.99],
+        chords: [[261.63, 329.63, 392], [293.66, 349.23, 440], [329.63, 392, 493.88], [261.63, 329.63, 392]],
+        rhythm: 0.38,
+        wave: "sine",
+        gain: 0.05
       },
       {
-        id: "baby",
-        name: "B. Baby / Gender Reveal",
-        note: "更可爱、轻一点，适合满月和猜男孩女孩。",
-        melody: [659.25, 783.99, 880, 783.99, 659.25, 587.33, 659.25, 783.99],
-        rhythm: 0.3,
-        wave: "triangle"
+        id: "piano",
+        name: "F. 钢琴感邀请 / Soft Piano",
+        note: "正式、干净，适合大多数派对，不会太可爱。",
+        melody: [659.25, 587.33, 523.25, 587.33, 659.25, 783.99, 739.99, 659.25],
+        chords: [[220, 329.63, 440], [246.94, 349.23, 493.88], [261.63, 392, 523.25], [220, 329.63, 440]],
+        rhythm: 0.44,
+        wave: "triangle",
+        gain: 0.052
       },
       {
-        id: "birthday",
-        name: "C. 生日派对感 / Birthday Cheer",
-        note: "比较开心，但不是直接用生日歌，避免版权和太俗。",
-        melody: [523.25, 523.25, 659.25, 523.25, 783.99, 698.46, 659.25, 587.33],
-        rhythm: 0.26,
-        wave: "sine"
+        id: "gender-pop",
+        name: "G. 揭晓瞬间 / Reveal Pop",
+        note: "比较有期待感，适合 Gender Reveal 和宝宝派对。",
+        melody: [523.25, 587.33, 659.25, 783.99, 1046.5, 987.77, 880, 1046.5],
+        chords: [[261.63, 392, 523.25], [293.66, 440, 587.33], [329.63, 493.88, 659.25], [392, 523.25, 783.99]],
+        rhythm: 0.28,
+        wave: "triangle",
+        gain: 0.05
       },
       {
-        id: "romantic",
-        name: "D. 浪漫轻柔 / Romantic Soft",
-        note: "慢一点、比较优雅，适合 ROM、婚礼和正式晚宴。",
-        melody: [440, 523.25, 659.25, 783.99, 739.99, 659.25, 587.33, 523.25],
-        rhythm: 0.42,
-        wave: "sine"
+        id: "party-light",
+        name: "H. 轻快派对 / Light Party",
+        note: "比较开心，适合生日和私人派对。",
+        melody: [659.25, 783.99, 659.25, 880, 783.99, 659.25, 587.33, 659.25, 783.99, 987.77],
+        chords: [[261.63, 329.63, 392], [349.23, 440, 523.25], [392, 493.88, 587.33], [329.63, 392, 493.88]],
+        rhythm: 0.24,
+        wave: "square",
+        gain: 0.035
+      },
+      {
+        id: "dinner",
+        name: "I. 优雅晚宴 / Elegant Dinner",
+        note: "成熟一点，适合正式晚宴、ROM 或公司庆祝。",
+        melody: [440, 493.88, 523.25, 659.25, 587.33, 523.25, 493.88, 440],
+        chords: [[220, 277.18, 329.63], [196, 246.94, 293.66], [174.61, 220, 261.63], [220, 277.18, 329.63]],
+        rhythm: 0.5,
+        wave: "sine",
+        gain: 0.055
       }
     ];
 
@@ -187,7 +205,7 @@
       const AudioContext = window.AudioContext || window.webkitAudioContext;
       audioContext = new AudioContext();
       masterGain = audioContext.createGain();
-      masterGain.gain.value = 0.055;
+      masterGain.gain.value = 0.07;
       masterGain.connect(audioContext.destination);
     }
 
@@ -205,21 +223,33 @@
       stopAll();
       audioContext.resume();
       const now = audioContext.currentTime + 0.04;
-      track.melody.forEach((frequency, index) => {
+      function scheduleTone(frequency, start, duration, wave, peak, detune) {
         const osc = audioContext.createOscillator();
         const gain = audioContext.createGain();
-        const start = now + index * track.rhythm;
-        const duration = track.rhythm * 0.72;
-        osc.type = track.wave;
+        osc.type = wave;
         osc.frequency.setValueAtTime(frequency, start);
+        osc.detune.value = detune || 0;
         gain.gain.setValueAtTime(0.0001, start);
-        gain.gain.exponentialRampToValueAtTime(0.35, start + 0.04);
+        gain.gain.exponentialRampToValueAtTime(peak, start + 0.04);
         gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
         osc.connect(gain);
         gain.connect(masterGain);
         osc.start(start);
         osc.stop(start + duration + 0.04);
         activeOscillators.push(osc);
+      }
+
+      track.chords.forEach((chord, index) => {
+        const start = now + index * track.rhythm * 2;
+        chord.forEach((frequency, noteIndex) => {
+          scheduleTone(frequency, start, track.rhythm * 1.75, "sine", 0.055, noteIndex * 3);
+        });
+      });
+
+      track.melody.forEach((frequency, index) => {
+        const start = now + index * track.rhythm;
+        const duration = track.rhythm * 0.72;
+        scheduleTone(frequency, start, duration, track.wave, track.gain, 0);
       });
       stopTimer = window.setTimeout(stopAll, track.melody.length * track.rhythm * 1000 + 500);
       document.getElementById("status").textContent = `正在试听：${track.name}`;
